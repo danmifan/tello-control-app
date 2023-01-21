@@ -1,3 +1,9 @@
+*.make
+bin/
+.clangd/
+Makefile
+compile_commands.json
+
 # Prerequisites
 *.d
 

@@ -5,6 +5,7 @@
 #include "flight_control.h"
 #include "drone_status.h"
 #include "data.h"
+#include "views/main_view.h"
 
 bool run = true;
 
@@ -17,6 +18,8 @@ int main(int argc, char **argv) {
 
   FlightControl flight_control;
   DroneStatus drone_status;
+
+  MainView view;
 
   // struct sockaddr_in video_in;
   // int video_socket;
@@ -41,13 +44,15 @@ int main(int argc, char **argv) {
   flight_control.init();
   drone_status.init();
 
-  while (run) {
-    flight_control.takeoff();
-    flight_control.rotate(10);
-  }
+  // while (run) {
+  //   flight_control.takeoff();
+  //   flight_control.rotate(10);
+  // }
 
   window.init();
+  window.addWidget(&view);
   window.update();
+
   window.shutdown();
 
   return 0;

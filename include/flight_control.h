@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <thread>
 #include <deque>
+#include <atomic>
 
 class FlightControl {
  public:
@@ -23,6 +24,7 @@ class FlightControl {
   bool last_message_status_ = false;
   bool sdk_mode_enabled_ = false;
   std::thread th_;
+  std::atomic<bool> run_ = {true};
 
   void enableSDK();
 };

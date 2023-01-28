@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <thread>
 #include <deque>
+#include <atomic>
 
 class DroneStatus {
  public:
@@ -18,6 +19,7 @@ class DroneStatus {
   struct sockaddr_in state_addr_, source_addr_;
   int state_socket_;
   std::thread th_;
+  std::atomic<bool> run_ = {true};
 };
 
 #endif  // DRONE_STATUS_H

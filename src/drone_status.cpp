@@ -3,7 +3,13 @@
 #include <unistd.h>
 #include <iostream>
 
-DroneStatus::~DroneStatus() { close(state_socket_); }
+#include "global.h"
+
+DroneStatus::~DroneStatus() {
+  close(state_socket_);
+  run_ = false;
+  th_.join();
+}
 
 int DroneStatus::init() {
   state_socket_ = socket(AF_INET, SOCK_DGRAM, 0);
@@ -12,7 +18,11 @@ int DroneStatus::init() {
     return -1;
   }
 
-  // setsockopt(state_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof(tv));
+  struct timeval tv;
+  tv.tv_sec = 2;
+  tv.tv_usec = 0;
+
+  setsockopt(state_socket_, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof(tv));
 
   state_addr_.sin_family = AF_INET;
   state_addr_.sin_addr.s_addr = inet_addr("0.0.0.0");
@@ -24,7 +34,7 @@ int DroneStatus::init() {
   }
 
   th_ = std::thread([&]() {
-    while (1) {
+    while (run_) {
       DroneState state;
 
       char state_buffer[256];
@@ -34,7 +44,7 @@ int DroneStatus::init() {
                           (struct sockaddr *)&source_addr_, &len);
 
       if (size < 0) {
-        std::cout << "State reception failed" << std::endl;
+        // std::cout << "State reception failed" << std::endl;
       } else {
         struct timeval tv;
         gettimeofday(&tv, NULL);
@@ -42,6 +52,8 @@ int DroneStatus::init() {
 
         time_t nowtime;
         char buffer[256];
+
+        std::cout << state_buffer << std::endl;
 
         sscanf(state_buffer,
                "pitch:%i;roll:%i;yaw:%i;vgx:%f;vgy:%f;vgz:%f;templ:%i;temph:%i;tof:%i;h:%i;bat:%i;"
@@ -51,7 +63,8 @@ int DroneStatus::init() {
                &state.h, &state.bat, &state.baro, &state.time, &state.acceleration.x,
                &state.acceleration.y, &state.acceleration.z);
 
-        states_.push_front(state);
+        // states_.push_front(state);
+        status_.push_back(state);
       }
     }
   });

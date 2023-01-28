@@ -3,7 +3,11 @@
 #include <unistd.h>
 #include <iostream>
 
-FlightControl::~FlightControl() { close(cmd_socket_); }
+FlightControl::~FlightControl() {
+  close(cmd_socket_);
+  run_ = false;
+  th_.join();
+}
 
 int FlightControl::init() {
   cmd_socket_ = socket(AF_INET, SOCK_DGRAM, 0);
@@ -16,7 +20,7 @@ int FlightControl::init() {
   tv.tv_sec = 2;
   tv.tv_usec = 0;
 
-  // setsockopt(cmd_socket_, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof(tv));
+  setsockopt(cmd_socket_, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof(tv));
 
   cmd_addr_.sin_family = AF_INET;
   cmd_addr_.sin_addr.s_addr = inet_addr("192.168.10.1");
@@ -29,7 +33,7 @@ int FlightControl::init() {
   char answer_buffer[256];
 
   th_ = std::thread([&]() {
-    while (1) {
+    while (run_) {
       if (!commands_.empty()) {
         std::string command = commands_.back();
         commands_.pop_back();
@@ -44,7 +48,7 @@ int FlightControl::init() {
         int size = recvfrom(cmd_socket_, answer_buffer, sizeof(answer_buffer), 0,
                             (struct sockaddr *)&source_addr_, &source_addr_size_);
         if (size < 0) {
-          std::cout << "Answer reception failed" << std::endl;
+          // std::cout << "Answer reception failed" << std::endl;
         } else {
           // std::cout << " Address : " << cmd_in.sin_addr.s_addr << std::endl;
           std::cout << "Answer : " << answer_buffer << std::endl;

@@ -1,10 +1,6 @@
 workspace "tello-control-app"
   configurations { "Debug", "Release" }
 
-  -- configurations {"Debug"}
-
--- include("conanbuildinfo.premake.lua")
-
   buildoptions {"--std=c++14"}
 
   filter "configurations:Debug"
@@ -15,8 +11,6 @@ workspace "tello-control-app"
     defines { "NDEBUG" }
     optimize "On"
 
-
--- linkoptions { }
 
 project "imgui"
   kind "SharedLib"
@@ -69,6 +63,7 @@ project "tello-control-app"
 
   includedirs {
     "include",
+    "thirdparty/imgui",
   }
 
   libdirs {
@@ -82,5 +77,6 @@ project "tello-control-app"
   }
 
   files {
-    "src/*.cpp"
+    "src/*.cpp",
+    "src/views/*.cpp"
   }

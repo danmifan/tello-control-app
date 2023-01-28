@@ -27,11 +27,6 @@ int MyWindow::init() {
   glfwMakeContextCurrent(window_);
   glfwSwapInterval(1);
 
-  // bool err = gladLoadGL() == 0;
-  // if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-  //   std::cout << "Failed to initialize OpenGL Loader" << std::endl;
-  // }
-
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO &io = ImGui::GetIO();
@@ -58,10 +53,10 @@ void MyWindow::update() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // GUI
-    ImGui::Begin("zob");
-    ImGui::Text("%s", "Test");
-    ImGui::End();
+    // Widgets
+    for (const auto &widget : widgets_) {
+      widget->update();
+    }
 
     ImGui::Render();
 
@@ -81,6 +76,9 @@ void MyWindow::update() {
 }
 
 void MyWindow::shutdown() {
+  for (const auto &widget : widgets_) {
+    widget->shutdown();
+  }
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
 
@@ -88,3 +86,5 @@ void MyWindow::shutdown() {
   glfwTerminate();
   ImGui::DestroyContext();
 }
+
+void MyWindow::addWidget(AbstractWidget *widget) { widgets_.push_back(widget); }

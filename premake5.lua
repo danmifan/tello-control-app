@@ -1,5 +1,6 @@
 workspace "tello-control-app"
   configurations { "Debug", "Release" }
+
   -- configurations {"Debug"}
 
 -- include("conanbuildinfo.premake.lua")
@@ -36,34 +37,10 @@ project "imgui"
     "thirdparty/imgui/backends/imgui_impl_opengl3.cpp",
   }
 
--- project "dji-control-app"
---   kind "SharedLib"
---   language "C++"
---   targetdir "lib/"
-
---   includedirs {
---     "include",
---     "thirdparty/imgui",
---     "thirdparty/imgui-sfml"
---   }
-
---   libdirs {
---     "lib",
---   }
-
---   links {
---   }
-
---   files {
---     "src/engine.cpp",
---     "src/entity.cpp",
---     "src/gui/*.cpp"
---   }
-
-project "tello-control-app"
-  kind "ConsoleApp"
+project "window"
+  kind "SharedLib"
   language "C++"
-  targetdir "bin/"
+  targetdir "lib/"
 
   includedirs {
     "include",
@@ -82,5 +59,28 @@ project "tello-control-app"
   }
 
   files {
-    "src/main.cpp"
+    "src/window/window.cpp"
+  }
+
+project "tello-control-app"
+  kind "ConsoleApp"
+  language "C++"
+  targetdir "bin/"
+
+  includedirs {
+    "include",
+  }
+
+  libdirs {
+    "lib",
+  }
+
+  links {
+    "imgui",
+    "window",
+    "pthread"
+  }
+
+  files {
+    "src/*.cpp"
   }

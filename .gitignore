@@ -3,6 +3,7 @@ bin/
 .clangd/
 Makefile
 compile_commands.json
+*.ini
 
 # Prerequisites
 *.d

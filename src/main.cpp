@@ -1,96 +1,54 @@
-// #include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
-
 #include <iostream>
+#include <signal.h>
 
-GLFWwindow *window_;
+#include "window/window.h"
+#include "flight_control.h"
+#include "drone_status.h"
+#include "data.h"
 
-void glfw_error_callback(int error, const char *description) {
-  std::cout << "GLFW error : " << error << " : " << description << std::endl;
-}
+bool run = true;
 
-int init() {
-  glfwSetErrorCallback(glfw_error_callback);
-  if (!glfwInit()) {
-    return -1;
-  }
-
-  window_ = glfwCreateWindow(800, 600, "Window", NULL, NULL);
-
-  if (!window_) {
-    glfwTerminate();
-    return -1;
-  }
-
-  glfwMakeContextCurrent(window_);
-  glfwSwapInterval(1);
-
-  // bool err = gladLoadGL() == 0;
-  // if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-  //   std::cout << "Failed to initialize OpenGL Loader" << std::endl;
-  // }
-
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
-  ImGuiIO &io = ImGui::GetIO();
-  (void)io;
-
-  ImGui::StyleColorsDark();
-
-  ImGui_ImplGlfw_InitForOpenGL(window_, true);
-  ImGui_ImplOpenGL3_Init("#version 130");
-
-  return 1;
-}
-
-void update() {
-  ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-  while (!glfwWindowShouldClose(window_)) {
-    glfwPollEvents();
-
-    // Render loop
-
-    // ImGUI new frame
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    // GUI
-
-    ImGui::Render();
-
-    int width, height;
-    glfwGetFramebufferSize(window_, &width, &height);
-    glViewport(0, 0, width, height);
-
-    // Render loop end
-
-    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-    glfwSwapBuffers(window_);
-  }
-}
-
-void shutdown() {
-  ImGui_ImplOpenGL3_Shutdown();
-  ImGui_ImplGlfw_Shutdown();
-
-  glfwDestroyWindow(window_);
-  glfwTerminate();
-  ImGui::DestroyContext();
-}
+void handle_signal(int signal) { run = false; }
 
 int main(int argc, char **argv) {
-  init();
-  update();
-  shutdown();
+  MyWindow window(800, 600);
+
+  signal(SIGINT, handle_signal);
+
+  FlightControl flight_control;
+  DroneStatus drone_status;
+
+  // struct sockaddr_in video_in;
+  // int video_socket;
+
+  // struct timeval tv;
+  // tv.tv_sec = 2;
+  // tv.tv_usec = 0;
+
+  // video_socket = socket(AF_INET, SOCK_DGRAM, 0);
+  // if (video_socket == -1) {
+  //   std::cout << "Errour could not initialize VIDEO socket" << std::endl;
+  //   return -1;
+  // }
+
+  // video_in.sin_family = AF_INET;
+  // video_in.sin_addr.s_addr = inet_addr("0.0.0.0");
+  // video_in.sin_port = htons(11111);
+  // if (bind(video_socket, (sockaddr *)&video_in, sizeof(video_in)) == -1) {
+  //   std::cout << "VIDEO socket bind failed" << std::endl;
+  // }
+
+  flight_control.init();
+  drone_status.init();
+
+  while (run) {
+    flight_control.takeoff();
+    flight_control.rotate(10);
+  }
+
+  window.init();
+  window.update();
+  window.shutdown();
+
   return 0;
 }

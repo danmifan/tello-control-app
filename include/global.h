@@ -4,6 +4,6 @@
 #include <deque>
 #include "drone_status.h"
 
-static std::deque<DroneState> status_;
+extern std::deque<DroneState> status_;
 
 #endif  // GLOBAL_H

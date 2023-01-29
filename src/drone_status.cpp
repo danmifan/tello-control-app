@@ -5,6 +5,8 @@
 
 #include "global.h"
 
+std::deque<DroneState> status_;
+
 DroneStatus::~DroneStatus() {
   close(state_socket_);
   run_ = false;
@@ -17,12 +19,6 @@ int DroneStatus::init() {
     std::cout << "Error could not initialize STATE socket" << std::endl;
     return -1;
   }
-
-  struct timeval tv;
-  tv.tv_sec = 2;
-  tv.tv_usec = 0;
-
-  setsockopt(state_socket_, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof(tv));
 
   state_addr_.sin_family = AF_INET;
   state_addr_.sin_addr.s_addr = inet_addr("0.0.0.0");
@@ -50,18 +46,15 @@ int DroneStatus::init() {
         gettimeofday(&tv, NULL);
         state.timestamp = tv;
 
-        time_t nowtime;
-        char buffer[256];
-
-        std::cout << state_buffer << std::endl;
-
         sscanf(state_buffer,
-               "pitch:%i;roll:%i;yaw:%i;vgx:%f;vgy:%f;vgz:%f;templ:%i;temph:%i;tof:%i;h:%i;bat:%i;"
+               "pitch:%i;roll:%i;yaw:%i;vgx:%i;vgy:%i;vgz:%i;templ:%i;temph:%i;tof:%i;h:%i;bat:%i;"
                "baro:%f;time:%i;agx:%f;agy:%f;agz:%f;",
-               &state.attitude.x, &state.attitude.y, &state.attitude.z, &state.velocity.x,
+               &state.attitude.y, &state.attitude.x, &state.attitude.z, &state.velocity.x,
                &state.velocity.y, &state.velocity.z, &state.templ, &state.temph, &state.tof,
                &state.h, &state.bat, &state.baro, &state.time, &state.acceleration.x,
                &state.acceleration.y, &state.acceleration.z);
+
+        // std::cout << state_buffer << std::endl;
 
         // states_.push_front(state);
         status_.push_back(state);

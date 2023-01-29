@@ -3,15 +3,18 @@
 
 #include "data.h"
 #include "window/abstract_widget.h"
+#include "flight_control.h"
 
 #include "global.h"
 
 class MainView : public AbstractWidget {
  public:
-  void update();
+  MainView(FlightControl* fc) : fc_(fc) {}
+  void update() override;
 
  private:
   DroneState current_state_;
+  FlightControl* fc_;
 };
 
 #endif  // MAIN_VIEW_H

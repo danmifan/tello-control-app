@@ -1,7 +1,7 @@
 workspace "tello-control-app"
   configurations { "Debug", "Release" }
 
-  buildoptions {"--std=c++14"}
+  buildoptions {"--std=c++14", "-Wall", "-Wextra"}
 
   filter "configurations:Debug"
     defines { "DEBUG" }
@@ -53,7 +53,7 @@ project "window"
   }
 
   files {
-    "src/window/window.cpp"
+    "src/window/*.cpp"
   }
 
 project "tello-control-app"
@@ -74,9 +74,26 @@ project "tello-control-app"
     "imgui",
     "window",
     "pthread"
+    
   }
 
   files {
     "src/*.cpp",
     "src/views/*.cpp"
+  }
+
+project "streaming"
+  kind "ConsoleApp"
+  language "C++"
+  targetdir "bin/"
+
+  buildoptions { "`pkg-config --cflags opencv4`"}
+  linkoptions {"`pkg-config --libs opencv4`" }
+
+  links {
+    "pthread"
+  }
+
+  files {
+    "src/streaming/streaming.cpp"
   }

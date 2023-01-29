@@ -4,6 +4,7 @@ bin/
 Makefile
 compile_commands.json
 *.ini
+.vscode
 
 # Prerequisites
 *.d

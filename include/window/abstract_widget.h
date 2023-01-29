@@ -3,9 +3,10 @@
 
 class AbstractWidget {
  public:
-  virtual void init() {}
+  virtual ~AbstractWidget() = default;
+  virtual void init();
   virtual void update() = 0;
-  virtual void shutdown() {}
+  virtual void shutdown();
   bool isInit() { return init_; }
 
  private:

@@ -6,6 +6,7 @@
 #include <thread>
 #include <deque>
 #include <atomic>
+#include <vector>
 
 class FlightControl {
  public:
@@ -15,6 +16,11 @@ class FlightControl {
   void rotate(int angle);
   void takeoff();
   void land();
+  void radioControl(int x, int y, int z, int yaw);
+  void enableSDK();
+  void getBattery();
+  void customCommand(std::string command);
+  void streamon();
 
  private:
   struct sockaddr_in cmd_addr_, source_addr_;
@@ -25,8 +31,6 @@ class FlightControl {
   bool sdk_mode_enabled_ = false;
   std::thread th_;
   std::atomic<bool> run_ = {true};
-
-  void enableSDK();
 };
 
 #endif  // FLIGHT_CONTROL_H

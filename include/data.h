@@ -4,27 +4,27 @@
 #include <sys/time.h>
 
 struct Vec3f {
-  float x;
-  float y;
-  float z;
+  float x = 0.0f;
+  float y = 0.0f;
+  float z = 0.0f;
 };
 
 struct Vec3i {
-  int x;
-  int y;
-  int z;
+  int x = 0;
+  int y = 0;
+  int z = 0;
 };
 
 struct DroneState {
   Vec3i attitude;
-  Vec3f velocity;
-  int templ;
-  int temph;
-  int tof;
-  int h;
-  int bat;
-  float baro;
-  int time;
+  Vec3i velocity;
+  int templ = 0;
+  int temph = 0;
+  int tof = 0;
+  int h = 0;
+  int bat = 0;
+  float baro = 0.0f;
+  int time = 0;
   Vec3f acceleration;
   struct timeval timestamp;
 };

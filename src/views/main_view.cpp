@@ -51,14 +51,19 @@ void MainView::update() {
     fc_->customCommand(str);
   }
 
+  if (ImGui::Button("Stream ON")) {
+    fc_->streamon();
+    std::cout << "streamon" << std::endl;
+  }
+
+  if (ImGui::Button("Stream OFF")) {
+    fc_->streamoff();
+    std::cout << "streamoff" << std::endl;
+  }
+
   if (ImGui::Button("EnableSDK")) {
     fc_->enableSDK();
     std::cout << "enable SDK" << std::endl;
-  }
-
-  if (ImGui::Button("StreamON")) {
-    fc_->streamon();
-    std::cout << "streamon" << std::endl;
   }
 
   ImGui::End();

@@ -1,12 +1,8 @@
 #ifndef VIDEO_STREAMING_H
 #define VIDEO_STREAMING_H
 
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <thread>
-#include <deque>
 #include <atomic>
-#include <vector>
+#include <thread>
 
 class VideoStreaming {
  public:
@@ -14,9 +10,8 @@ class VideoStreaming {
   void init();
 
  private:
-  struct sockaddr_in video_addr_;
-  unsigned int source_addr_size_;
-  int video_socket_;
+  std::atomic<bool> run_ = {true};
+  std::thread th_;
 };
 
 #endif  // VIDEO_STREAMING_H

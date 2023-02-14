@@ -61,20 +61,26 @@ project "tello-control-app"
   language "C++"
   targetdir "bin/"
 
+  -- buildoptions { "`pkg-config --cflags opencv4`"}
+  -- linkoptions {"`pkg-config --libs opencv4`" }
+
   includedirs {
     "include",
     "thirdparty/imgui",
+    "/usr/local/include/opencv4"
   }
 
   libdirs {
     "lib",
+    "/usr/local/lib"
   }
 
   links {
     "imgui",
     "window",
-    "pthread"
-    
+    "pthread",
+    "opencv_core",
+    "opencv_videoio"
   }
 
   files {
@@ -82,18 +88,11 @@ project "tello-control-app"
     "src/views/*.cpp"
   }
 
-project "streaming"
-  kind "ConsoleApp"
-  language "C++"
-  targetdir "bin/"
+-- project "cli"
+--   kind "ConsoleApp"
+--   language "C++"
+--   targetdir "bin/"
 
-  buildoptions { "`pkg-config --cflags opencv4`"}
-  linkoptions {"`pkg-config --libs opencv4`" }
-
-  links {
-    "pthread"
-  }
-
-  files {
-    "src/streaming/streaming.cpp"
-  }
+--   files {
+--     "src/cli/cli.cpp"
+--   }

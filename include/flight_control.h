@@ -12,6 +12,7 @@ class FlightControl {
  public:
   ~FlightControl();
   int init();
+  void shutdown();
 
   void rotate(int angle);
   void takeoff();
@@ -21,6 +22,8 @@ class FlightControl {
   void getBattery();
   void customCommand(std::string command);
   void streamon();
+  void streamoff();
+  bool isFlying();
 
  private:
   struct sockaddr_in cmd_addr_, source_addr_;
@@ -31,6 +34,7 @@ class FlightControl {
   bool sdk_mode_enabled_ = false;
   std::thread th_;
   std::atomic<bool> run_ = {true};
+  bool is_flying_ = false;
 };
 
 #endif  // FLIGHT_CONTROL_H

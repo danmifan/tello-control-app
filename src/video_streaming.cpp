@@ -1,23 +1,46 @@
 #include "video_streaming.h"
 
-#include <unistd.h>
 #include <iostream>
+#include <chrono>
+#include <opencv2/core.hpp>
+#include <opencv2/videoio.hpp>
+#include <opencv2/highgui.hpp>
 
-VideoStreaming::~VideoStreaming() { close(video_socket_); }
+VideoStreaming::~VideoStreaming() {
+  run_ = false;
+  th_.join();
+}
 
 void VideoStreaming::init() {
-  video_socket_ = socket(AF_INET, SOCK_DGRAM, 0);
-  if (video_socket_ == -1) {
-    std::cout << "Errour could not initialize VIDEO socket" << std::endl;
-    return;
-  }
+  th_ = std::thread([&]() {
+    cv::VideoCapture cap;
 
-  video_addr_.sin_family = AF_INET;
-  video_addr_.sin_addr.s_addr = inet_addr("0.0.0.0");
-  video_addr_.sin_port = htons(11111);
-  if (bind(video_socket_, (sockaddr *)&video_addr_, sizeof(video_addr_)) == -1) {
-    std::cout << "VIDEO socket bind failed" << std::endl;
-  }
+    // if (cap.open("udp://0.0.0.0:11111", cv::CAP_GSTREAMER)) {
+    //   std::cout << "Open" << std::endl;
+    // } else {
+    //   std::cout << "Open failed" << std::endl;
+    // }
 
-  source_addr_size_ = sizeof(video_addr_);
+    while (!cap.open("udp://0.0.0.0:11111", cv::CAP_GSTREAMER) && run_) {
+      std::cout << "what" << std::endl;
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+
+    while (run_) {
+      cv::Mat frame;
+      if (cap.read(frame)) {
+        // push into queue ?
+        // std::cout << frame.size << std::endl;
+        // std::cout << cv::typeToString(frame.type()) << std::endl;
+      } else {
+        // std::cout << "no frame" << std::endl;
+      }
+
+      // if (cv::waitKey(1) >= 0) {
+      //   break;
+      // }
+    }
+
+    std::cout << "end of loop" << std::endl;
+  });
 }

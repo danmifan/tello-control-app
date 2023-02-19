@@ -52,11 +52,13 @@ void MainView::update() {
   }
 
   if (ImGui::Button("Stream ON")) {
+    vs_->start();
     fc_->streamon();
     std::cout << "streamon" << std::endl;
   }
 
   if (ImGui::Button("Stream OFF")) {
+    vs_->stop();
     fc_->streamoff();
     std::cout << "streamoff" << std::endl;
   }

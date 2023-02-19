@@ -11,24 +11,18 @@
 
 #include <opencv2/core.hpp>
 
-int main(int argc, char **argv) {
-  MyWindow window(800, 600);
+int main(int /*argc*/, char** /*argv*/) {
+  MyWindow window(1400, 800);
 
   FlightControl flight_control;
-  // DroneStatus drone_status;
+  DroneStatus drone_status;
   // Joystick joystick;
   VideoStreaming stream;
 
-  // std::cout << "OpenCV version : " << CV_VERSION << std::endl;
-  // std::cout << "Major version : " << CV_MAJOR_VERSION << std::endl;
-  // std::cout << "Minor version : " << CV_MINOR_VERSION << std::endl;
-  // std::cout << "Subminor version : " << CV_SUBMINOR_VERSION << std::endl;
-
-  MainView view(&flight_control);
+  MainView view(&flight_control, &stream);
 
   flight_control.init();
-  stream.init();
-  // drone_status.init();
+  drone_status.init();
   // joystick.init();
 
   // std::thread th([&]() {
@@ -44,7 +38,12 @@ int main(int argc, char **argv) {
   //   }
   // });
 
+#warning not exiting properly when closing window with an active stream
+
   window.init();
+
+  stream.setImage(window.getImage());
+
   window.addWidget(&view);
   window.update();
 

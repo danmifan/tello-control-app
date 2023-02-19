@@ -4,6 +4,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <iostream>
+#include <GL/gl.h>
 
 MyWindow::MyWindow(int width, int height) : width_(width), height_(height) {}
 
@@ -17,7 +18,7 @@ int MyWindow::init() {
     return -1;
   }
 
-  window_ = glfwCreateWindow(800, 600, "Window", NULL, NULL);
+  window_ = glfwCreateWindow(width_, height_, "Window", NULL, NULL);
 
   if (!window_) {
     glfwTerminate();
@@ -37,6 +38,20 @@ int MyWindow::init() {
   ImGui_ImplGlfw_InitForOpenGL(window_, true);
   ImGui_ImplOpenGL3_Init("#version 130");
 
+  image_data_ = (unsigned char *)malloc(960 * 720 * 3);
+  memset(image_data_, 0, 960 * 720 * 3);
+
+  // Create texture
+  glGenTextures(1, &image_texture_);
+  glBindTexture(GL_TEXTURE_2D, image_texture_);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+
   return 1;
 }
 
@@ -44,6 +59,7 @@ void MyWindow::update() {
   ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
   while (!glfwWindowShouldClose(window_)) {
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 960, 720, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data_);
     glfwPollEvents();
 
     // Render loop
@@ -57,6 +73,10 @@ void MyWindow::update() {
     for (const auto &widget : widgets_) {
       widget->update();
     }
+
+    ImGui::Begin("OpenGL texture test");
+    ImGui::Image((void *)(intptr_t)image_texture_, ImVec2(960, 720));
+    ImGui::End();
 
     ImGui::Render();
 
@@ -85,6 +105,10 @@ void MyWindow::shutdown() {
   glfwDestroyWindow(window_);
   glfwTerminate();
   ImGui::DestroyContext();
+
+  glDeleteTextures(1, &image_texture_);
 }
 
 void MyWindow::addWidget(AbstractWidget *widget) { widgets_.push_back(widget); }
+
+unsigned char *MyWindow::getImage() { return image_data_; }

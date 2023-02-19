@@ -14,11 +14,16 @@ class MyWindow {
   void shutdown();
   void addWidget(AbstractWidget* widget);
 
+  // tmp
+  unsigned char* getImage();
+
  private:
   GLFWwindow* window_;
   int width_;
   int height_;
   std::list<AbstractWidget*> widgets_;
+  unsigned char* image_data_;
+  GLuint image_texture_;
 };
 
 #endif  // IMGUI_WINDOW_H

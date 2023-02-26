@@ -80,6 +80,7 @@ project "tello-control-app"
     "imgui",
     "window",
     "pthread",
+    "GL"
     -- "opencv_core",
     -- "opencv_videoio"
   }

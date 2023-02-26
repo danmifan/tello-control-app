@@ -11,11 +11,12 @@
 
 class VideoStreaming {
  public:
+  VideoStreaming(int width, int height, int channels);
   ~VideoStreaming();
   void start();
   void stop();
 
-  void setImage(unsigned char* image);
+  unsigned char* getImage();
 
  private:
   std::atomic<bool> run_ = {false};

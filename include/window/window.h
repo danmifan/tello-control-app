@@ -16,6 +16,7 @@ class MyWindow {
 
   // tmp
   unsigned char* getImage();
+  GLuint getTexture();
 
  private:
   GLFWwindow* window_;

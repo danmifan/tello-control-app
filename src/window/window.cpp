@@ -39,9 +39,6 @@ int MyWindow::init() {
   ImGui_ImplGlfw_InitForOpenGL(window_, true);
   ImGui_ImplOpenGL3_Init("#version 130");
 
-  image_data_ = (unsigned char *)malloc(960 * 720 * 3);
-  memset(image_data_, 0, 960 * 720 * 3);
-
   // Create texture
   glGenTextures(1, &image_texture_);
   glBindTexture(GL_TEXTURE_2D, image_texture_);
@@ -60,7 +57,6 @@ void MyWindow::update() {
   ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
   while (!glfwWindowShouldClose(window_)) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 960, 720, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data_);
     glfwPollEvents();
 
     // Render loop
@@ -76,10 +72,6 @@ void MyWindow::update() {
     for (const auto &widget : widgets_) {
       widget->update();
     }
-
-    ImGui::Begin("OpenGL texture test");
-    ImGui::Image((void *)(intptr_t)image_texture_, ImVec2(960, 720));
-    ImGui::End();
 
     ImGui::Render();
 
@@ -115,3 +107,5 @@ void MyWindow::shutdown() {
 void MyWindow::addWidget(AbstractWidget *widget) { widgets_.push_back(widget); }
 
 unsigned char *MyWindow::getImage() { return image_data_; }
+
+GLuint MyWindow::getTexture() { return image_texture_; }

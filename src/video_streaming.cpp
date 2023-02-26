@@ -3,11 +3,18 @@
 #include <iostream>
 #include <chrono>
 
+VideoStreaming::VideoStreaming(int width, int height, int channels) {
+  image_ = (unsigned char*)malloc(width * height * channels);
+  memset(image_, 0, width * height * channels);
+}
+
 VideoStreaming::~VideoStreaming() {
   if (run_) {
     run_ = false;
     th_.join();
   }
+
+  delete image_;
 }
 
 void VideoStreaming::start() {
@@ -65,4 +72,4 @@ void VideoStreaming::stop() {
   }
 }
 
-void VideoStreaming::setImage(unsigned char *image) { image_ = image; }
+unsigned char* VideoStreaming::getImage() { return image_; }

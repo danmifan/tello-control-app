@@ -13,9 +13,9 @@ int main(int /*argc*/, char** /*argv*/) {
   FlightControl flight_control;
   DroneStatus drone_status;
   // Joystick joystick;
-  VideoStreaming stream;
+  VideoStreaming stream(960, 720, 3);
 
-  MainView view(&flight_control, &stream);
+  MainView view(&flight_control, &stream, 960, 720);
 
   flight_control.start();
   drone_status.start();
@@ -38,9 +38,9 @@ int main(int /*argc*/, char** /*argv*/) {
 
   window.init();
 
-  stream.setImage(window.getImage());
-
   window.addWidget(&view);
+  view.setImage(stream.getImage());
+  view.setTexture(window.getTexture());
   window.update();
 
   window.shutdown();

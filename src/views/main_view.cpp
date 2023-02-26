@@ -8,28 +8,16 @@
 
 char buffer[256];
 
-void MainView::update() {
-  if (!status_.empty()) {
-    current_state_ = status_.back();
-  }
+void MainView::showDroneVideoFeed() {
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width_, image_height_, 0, GL_RGB, GL_UNSIGNED_BYTE,
+               image_);
 
-  ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-  const ImGuiViewport* viewport = ImGui::GetMainViewport();
-  ImGui::SetNextWindowPos(viewport->WorkPos);
-  ImGui::SetNextWindowSize(viewport->WorkSize);
-  ImGui::SetNextWindowViewport(viewport->ID);
+  ImGui::Begin("Video feed");
+  ImGui::Image((void*)(intptr_t)texture_, ImVec2(image_width_, image_height_));
+  ImGui::End();
+}
 
-  // ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-  // ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-  window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
-                  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-
-  ImGui::Begin("DockSpace Demo", NULL, window_flags);
-
-  ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-  ImGui::DockSpace(dockspace_id, ImVec2(1600, 900));
-
+void MainView::showDroneStatus() {
   ImGui::Begin("Drone info");
   ImGui::Text("Roll : %i Pitch : %i Yaw : %i", current_state_.attitude.x, current_state_.attitude.y,
               current_state_.attitude.z);
@@ -46,7 +34,9 @@ void MainView::update() {
   ImGui::Text("Time : %i", current_state_.time);
 
   ImGui::End();
+}
 
+void MainView::showCommands() {
   ImGui::Begin("Commands");
 
   if (ImGui::Button("EnableSDK")) {
@@ -91,14 +81,70 @@ void MainView::update() {
   }
 
   ImGui::End();
+}
 
+void MainView::showConsole() {
   ImGui::Begin("Console");
 
   for (const auto& log : Log::get().getLogs()) {
     ImGui::Text("%s", log.c_str());
   }
 
-  ImGui::End();
+  // Auto scroll to last line
+  if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) ImGui::SetScrollHereY(1.0f);
 
   ImGui::End();
 }
+
+void MainView::update() {
+  if (!status_.empty()) {
+    current_state_ = status_.back();
+  }
+
+  ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+  const ImGuiViewport* viewport = ImGui::GetMainViewport();
+  ImGui::SetNextWindowPos(viewport->WorkPos);
+  ImGui::SetNextWindowSize(viewport->WorkSize);
+  ImGui::SetNextWindowViewport(viewport->ID);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+  window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+                  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+  ImGui::Begin("Dockspace", NULL, window_flags);
+
+  ImGui::PopStyleVar(2);
+
+  if (ImGui::BeginMenuBar()) {
+    if (ImGui::BeginMenu("Menu")) {
+      if (ImGui::MenuItem("Demo")) {
+        show_demo_ = true;
+      }
+
+      ImGui::EndMenu();
+    }
+    ImGui::EndMenuBar();
+  }
+
+  if (show_demo_) {
+    ImGui::ShowDemoWindow();
+  }
+
+  ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+  ImGui::DockSpace(dockspace_id, ImVec2(0, 0));
+
+  showDroneVideoFeed();
+
+  showDroneStatus();
+
+  showCommands();
+
+  showConsole();
+
+  ImGui::End();
+}
+
+void MainView::setImage(unsigned char* image) { image_ = image; }
+
+void MainView::setTexture(GLuint texture) { texture_ = texture; }

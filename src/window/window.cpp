@@ -32,6 +32,7 @@ int MyWindow::init() {
   ImGui::CreateContext();
   ImGuiIO &io = ImGui::GetIO();
   (void)io;
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;  // Enable Docking
 
   ImGui::StyleColorsDark();
 
@@ -68,6 +69,8 @@ void MyWindow::update() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+
+    // ImGui::ShowDemoWindow();
 
     // Widgets
     for (const auto &widget : widgets_) {

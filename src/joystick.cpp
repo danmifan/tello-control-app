@@ -4,7 +4,7 @@
 
 Joystick::~Joystick() { close(js_); }
 
-void Joystick::init() {
+void Joystick::start() {
   js_ = open(device_, O_RDONLY | O_NONBLOCK);
 
   if (js_ == -1) perror("Could not open joystick");

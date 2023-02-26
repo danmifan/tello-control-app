@@ -1,6 +1,4 @@
 #include <iostream>
-#include <signal.h>
-
 #include "window/window.h"
 #include "flight_control.h"
 #include "drone_status.h"
@@ -9,10 +7,8 @@
 #include "joystick.h"
 #include "video_streaming.h"
 
-#include <opencv2/core.hpp>
-
 int main(int /*argc*/, char** /*argv*/) {
-  MyWindow window(1400, 800);
+  MyWindow window(1600, 900);
 
   FlightControl flight_control;
   DroneStatus drone_status;
@@ -21,9 +17,9 @@ int main(int /*argc*/, char** /*argv*/) {
 
   MainView view(&flight_control, &stream);
 
-  flight_control.init();
-  drone_status.init();
-  // joystick.init();
+  flight_control.start();
+  drone_status.start();
+  // joystick.start();
 
   // std::thread th([&]() {
   //   while (1) {

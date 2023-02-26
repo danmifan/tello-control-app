@@ -3,23 +3,29 @@
 #include <unistd.h>
 #include <string.h>
 #include <iostream>
+#include "logger.h"
 
 FlightControl::~FlightControl() {
   run_ = false;
   th_.join();
   close(cmd_socket_);
+  if (answer_buffer_ != nullptr) {
+    delete answer_buffer_;
+  }
 }
 
-int FlightControl::init() {
+int FlightControl::start() {
   cmd_socket_ = socket(AF_INET, SOCK_DGRAM, 0);
   if (cmd_socket_ == -1) {
-    std::cout << "Error, could not initialize CMD socket" << std::endl;
+    Log::get().warning("Error, could not initialize CMD socket");
     return -1;
   }
 
+  answer_buffer_ = (char *)malloc(256);
+
   // Socket timeout
   struct timeval tv;
-  tv.tv_sec = 5;
+  tv.tv_sec = 2;
   tv.tv_usec = 0;
 
   setsockopt(cmd_socket_, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof(tv));
@@ -32,47 +38,46 @@ int FlightControl::init() {
 
   th_ = std::thread([&]() {
     while (run_) {
+      auto t1 = std::chrono::high_resolution_clock::now();
       if (!commands_.empty()) {
+        time_since_last_command_ = 0;
         std::string command = commands_.back();
         commands_.pop_back();
-
-        char *answer_buffer = (char *)malloc(256);
-
-        std::cout << "Sending command... " << command << std::endl;
 
         int send_size = sendto(cmd_socket_, command.data(), command.size(), 0,
                                (struct sockaddr *)&cmd_addr_, sizeof(cmd_addr_));
 
         if (send_size < 0) {
-          std::cout << "Send timeout " << std::endl;
+          Log::get().warning("Send timeout");
           continue;
         } else {
-          std::cout << "Command sent : " << command << std::endl;
+          Log::get().info("Command sent : " + command);
         }
 
-        int answer_size = recvfrom(cmd_socket_, answer_buffer, 256, 0,
+        int answer_size = recvfrom(cmd_socket_, answer_buffer_, 256, 0,
                                    (struct sockaddr *)&source_addr_, &source_addr_size_);
 
         if (answer_size < 0) {
-          std::cout << "Recv timeout" << std::endl;
+          Log::get().warning("Recv timeout");
         } else {
           char *test_answer = (char *)malloc(answer_size);
-          memcpy(test_answer, answer_buffer, answer_size);
-          std::cout << "Answer size : " << answer_size << std::endl;
-          std::cout << "Answer : " << test_answer << std::endl;
+          memcpy(test_answer, answer_buffer_, answer_size);
+          Log::get().info("Answer : " + std::string(test_answer));
 
-          if (strcmp(test_answer, "ok") == 0) {
-            std::cout << "bien ouej" << std::endl;
-            if (command == "command") {
-              std::cout << "Command AAAA" << std::endl;
-            }
-          } else if (strcmp(test_answer, "error") == 0) {
-          }
           delete test_answer;
-
-          // The drone needs time between two commands
-          std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
+      }
+
+      // The drone needs time between two commands
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+      auto t2 = std::chrono::high_resolution_clock::now();
+      time_since_last_command_ +=
+          std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+
+      // Tello disables itself after 15 seconds without command
+      if (time_since_last_command_ > 10000) {
+        enableSDK();
       }
     }
   });
@@ -114,5 +119,7 @@ void FlightControl::customCommand(std::string command) { commands_.emplace_front
 void FlightControl::streamon() { commands_.emplace_front(std::string("streamon")); }
 
 void FlightControl::streamoff() { commands_.emplace_front(std::string("streamoff")); }
+
+void FlightControl::hover() { commands_.emplace_front(std::string("stop")); }
 
 bool FlightControl::isFlying() { return is_flying_; }

@@ -4,6 +4,8 @@
 #include "global.h"
 #include <iostream>
 
+#include "logger.h"
+
 char buffer[256];
 
 void MainView::update() {
@@ -11,7 +13,24 @@ void MainView::update() {
     current_state_ = status_.back();
   }
 
-  ImGui::Begin("Drone status");
+  ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+  const ImGuiViewport* viewport = ImGui::GetMainViewport();
+  ImGui::SetNextWindowPos(viewport->WorkPos);
+  ImGui::SetNextWindowSize(viewport->WorkSize);
+  ImGui::SetNextWindowViewport(viewport->ID);
+
+  // ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+  // ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+  window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+                  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+  ImGui::Begin("DockSpace Demo", NULL, window_flags);
+
+  ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+  ImGui::DockSpace(dockspace_id, ImVec2(1600, 900));
+
+  ImGui::Begin("Drone info");
   ImGui::Text("Roll : %i Pitch : %i Yaw : %i", current_state_.attitude.x, current_state_.attitude.y,
               current_state_.attitude.z);
   ImGui::Text("vx : %i vy : %i vz : %i", current_state_.velocity.x, current_state_.velocity.y,
@@ -26,14 +45,24 @@ void MainView::update() {
   ImGui::Text("TOF : %i", current_state_.tof);
   ImGui::Text("Time : %i", current_state_.time);
 
+  ImGui::End();
+
+  ImGui::Begin("Commands");
+
+  if (ImGui::Button("EnableSDK")) {
+    fc_->enableSDK();
+  }
+
   if (ImGui::Button("Takeoff")) {
     fc_->takeoff();
-    std::cout << "Takeoff" << std::endl;
   }
 
   if (ImGui::Button("Landing")) {
     fc_->land();
-    std::cout << "Landing" << std::endl;
+  }
+
+  if (ImGui::Button("Hover")) {
+    fc_->hover();
   }
 
   if (ImGui::Button("Emergency")) {
@@ -51,22 +80,25 @@ void MainView::update() {
     fc_->customCommand(str);
   }
 
-  if (ImGui::Button("Stream ON")) {
-    vs_->start();
-    fc_->streamon();
-    std::cout << "streamon" << std::endl;
-  }
-
   if (ImGui::Button("Stream OFF")) {
     vs_->stop();
     fc_->streamoff();
-    std::cout << "streamoff" << std::endl;
   }
 
-  if (ImGui::Button("EnableSDK")) {
-    fc_->enableSDK();
-    std::cout << "enable SDK" << std::endl;
+  if (ImGui::Button("Stream ON")) {
+    vs_->start();
+    fc_->streamon();
   }
+
+  ImGui::End();
+
+  ImGui::Begin("Console");
+
+  for (const auto& log : Log::get().getLogs()) {
+    ImGui::Text("%s", log.c_str());
+  }
+
+  ImGui::End();
 
   ImGui::End();
 }

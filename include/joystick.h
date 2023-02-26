@@ -60,7 +60,7 @@ struct JoystickData {
 class Joystick {
  public:
   ~Joystick();
-  void init();
+  void start();
   bool getData(JoystickData &data);
 
  private:

@@ -11,7 +11,7 @@
 class FlightControl {
  public:
   ~FlightControl();
-  int init();
+  int start();
   void shutdown();
 
   void rotate(int angle);
@@ -23,6 +23,7 @@ class FlightControl {
   void customCommand(std::string command);
   void streamon();
   void streamoff();
+  void hover();
   bool isFlying();
 
  private:
@@ -35,6 +36,9 @@ class FlightControl {
   std::thread th_;
   std::atomic<bool> run_ = {true};
   bool is_flying_ = false;
+  int time_since_last_command_ = 0;
+
+  char* answer_buffer_ = nullptr;
 };
 
 #endif  // FLIGHT_CONTROL_H

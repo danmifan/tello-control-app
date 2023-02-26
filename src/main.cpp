@@ -6,6 +6,7 @@
 #include "views/main_view.h"
 #include "joystick.h"
 #include "video_streaming.h"
+#include "face_detection.h"
 
 int main(int /*argc*/, char** /*argv*/) {
   MyWindow window(1600, 900);
@@ -14,6 +15,7 @@ int main(int /*argc*/, char** /*argv*/) {
   DroneStatus drone_status;
   // Joystick joystick;
   VideoStreaming stream(960, 720, 3);
+  FaceDetection face_detection;
 
   MainView view(&flight_control, &stream, 960, 720);
 
@@ -34,13 +36,30 @@ int main(int /*argc*/, char** /*argv*/) {
   //   }
   // });
 
+  std::thread th([&]() {
+    while (1) {
+      if (!frames_.empty()) {
+        cv::Mat frame = frames_.front();
+        frames_.pop_front();
+        auto t1 = std::chrono::high_resolution_clock::now();
+        face_detection.detect(frame);
+        auto t2 = std::chrono::high_resolution_clock::now();
+        int duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        std::cout << "Total : " << duration << std::endl;
+      } else {
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+      }
+    }
+  });
+
 #warning not exiting properly when closing window with an active stream
 
   window.init();
 
   window.addWidget(&view);
   view.setImage(stream.getImage());
-  view.setTexture(window.getTexture());
+  view.setFaceImage(face_detection.getFaceImage());
+  view.setTextures(window.getTextures());
   window.update();
 
   window.shutdown();

@@ -19,14 +19,16 @@ class MainView : public AbstractWidget {
   void showCommands();
   void showConsole();
   void setImage(unsigned char* image);
-  void setTexture(GLuint texture);
+  void setFaceImage(unsigned char* face_image);
+  void setTextures(GLuint* textures);
 
  private:
   DroneState current_state_;
   FlightControl* fc_;
   VideoStreaming* vs_;
   unsigned char* image_;
-  GLuint texture_;
+  unsigned char* face_image_;
+  GLuint* textures_;
   int image_width_;
   int image_height_;
   bool show_demo_ = false;

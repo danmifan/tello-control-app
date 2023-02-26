@@ -43,8 +43,9 @@ void Log::message(Type type, std::string msg) {
   }
 
   std::string formated_msg = color + type_str + RESET + time_str + msg;
+  std::string formated_msg_wo_color = type_str + time_str + msg;
   std::cout << formated_msg << std::endl;
-  logs_.push_back(msg);
+  logs_.push_back(formated_msg_wo_color);
 }
 
 void Log::info(std::string msg) { message(Type::INFO, msg); }

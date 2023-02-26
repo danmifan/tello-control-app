@@ -1,12 +1,15 @@
 #include "window/window.h"
 
+#include <iostream>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include <iostream>
 #include <GL/gl.h>
+#include <chrono>
+#include <thread>
 
-MyWindow::MyWindow(int width, int height) : width_(width), height_(height) {}
+MyWindow::MyWindow(int width, int height, int framerate)
+    : width_(width), height_(height), framerate_(framerate) {}
 
 void glfw_error_callback(int error, const char *description) {
   std::cout << "GLFW error : " << error << " : " << description << std::endl;
@@ -40,8 +43,11 @@ int MyWindow::init() {
   ImGui_ImplOpenGL3_Init("#version 130");
 
   // Create texture
-  glGenTextures(1, &image_texture_);
-  glBindTexture(GL_TEXTURE_2D, image_texture_);
+  glGenTextures(2, image_textures_);
+
+  // glActiveTexture(GL_TEXTURE0);
+
+  glBindTexture(GL_TEXTURE_2D, image_textures_[0]);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -50,6 +56,19 @@ int MyWindow::init() {
 
   glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
+  // glActiveTexture(GL_TEXTURE1);
+
+  glBindTexture(GL_TEXTURE_2D, image_textures_[1]);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+
+  glBindTexture(GL_TEXTURE_2D, image_textures_[1]);
+
   return 1;
 }
 
@@ -57,6 +76,7 @@ void MyWindow::update() {
   ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
   while (!glfwWindowShouldClose(window_)) {
+    auto t1 = std::chrono::high_resolution_clock::now();
     glfwPollEvents();
 
     // Render loop
@@ -87,6 +107,17 @@ void MyWindow::update() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window_);
+
+    auto t2 = std::chrono::high_resolution_clock::now();
+
+    int ifps = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+    int target_ifps = (1.0f / framerate_) * 1000;
+
+    int diff_ifps = target_ifps - ifps;
+
+    if (diff_ifps > 0) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(diff_ifps));
+    }
   }
 }
 
@@ -101,11 +132,11 @@ void MyWindow::shutdown() {
   glfwTerminate();
   ImGui::DestroyContext();
 
-  glDeleteTextures(1, &image_texture_);
+  glDeleteTextures(2, image_textures_);
 }
 
 void MyWindow::addWidget(AbstractWidget *widget) { widgets_.push_back(widget); }
 
 unsigned char *MyWindow::getImage() { return image_data_; }
 
-GLuint MyWindow::getTexture() { return image_texture_; }
+GLuint *MyWindow::getTextures() { return image_textures_; }

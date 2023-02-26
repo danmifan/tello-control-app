@@ -22,7 +22,7 @@ class VideoStreaming {
   std::atomic<bool> run_ = {false};
   std::thread th_;
   cv::VideoCapture cap_;
-  std::deque<cv::Mat> frames_;
+  // std::deque<cv::Mat> frames_;
   unsigned char* image_;
 };
 

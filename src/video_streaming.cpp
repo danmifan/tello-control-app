@@ -3,6 +3,10 @@
 #include <iostream>
 #include <chrono>
 
+#include "global.h"
+
+std::deque<cv::Mat> frames_;
+
 VideoStreaming::VideoStreaming(int width, int height, int channels) {
   image_ = (unsigned char*)malloc(width * height * channels);
   memset(image_, 0, width * height * channels);
@@ -30,7 +34,7 @@ void VideoStreaming::start() {
   }
 
   th_ = std::thread([&]() {
-    while (!cap_.open("udp://0.0.0.0:11111", cv::CAP_FFMPEG) && run_) {
+    while (!cap_.open("udp://0.0.0.0:11111", cv::CAP_GSTREAMER) && run_) {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
       std::cout << "Waiting for stream..." << std::endl;
     }
@@ -40,19 +44,17 @@ void VideoStreaming::start() {
       if (cap_.read(frame)) {
         if (!frame.empty()) {
 #warning memory leak
-          // frames_.push_back(frame);
+          frames_.push_back(frame);
 
           cv::Mat cvt_frame;
 
           // does converting introduce delay ?
           cv::cvtColor(frame, cvt_frame, cv::COLOR_BGR2RGB);
-          std::cout << "Cvt : " << cvt_frame.size << std::endl;
-          std::cout << cv::typeToString(cvt_frame.type()) << std::endl;
+          // std::cout << "Cvt : " << cvt_frame.size << std::endl;
+          // std::cout << cv::typeToString(cvt_frame.type()) << std::endl;
 
           memcpy(image_, cvt_frame.data, 960 * 720 * 3);
         }
-        std::cout << frame.size << std::endl;
-        std::cout << cv::typeToString(frame.type()) << std::endl;
       } else {
         std::cout << "no frame" << std::endl;
       }

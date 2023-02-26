@@ -8,15 +8,15 @@
 
 class MyWindow {
  public:
-  MyWindow(int width, int height);
+  MyWindow(int width, int height, int framerate = 60);
   int init();
   void update();
   void shutdown();
   void addWidget(AbstractWidget* widget);
 
-  // tmp
+#warning tmp
   unsigned char* getImage();
-  GLuint getTexture();
+  GLuint* getTextures();
 
  private:
   GLFWwindow* window_;
@@ -24,7 +24,8 @@ class MyWindow {
   int height_;
   std::list<AbstractWidget*> widgets_;
   unsigned char* image_data_;
-  GLuint image_texture_;
+  GLuint image_textures_[2];
+  int framerate_;
 };
 
 #endif  // IMGUI_WINDOW_H

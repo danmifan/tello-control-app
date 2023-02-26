@@ -9,11 +9,12 @@
 char buffer[256];
 
 void MainView::showDroneVideoFeed() {
+  glBindTexture(GL_TEXTURE_2D, textures_[0]);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width_, image_height_, 0, GL_RGB, GL_UNSIGNED_BYTE,
                image_);
 
   ImGui::Begin("Video feed");
-  ImGui::Image((void*)(intptr_t)texture_, ImVec2(image_width_, image_height_));
+  ImGui::Image((void*)(intptr_t)textures_[0], ImVec2(image_width_, image_height_));
   ImGui::End();
 }
 
@@ -87,7 +88,17 @@ void MainView::showConsole() {
   ImGui::Begin("Console");
 
   for (const auto& log : Log::get().getLogs()) {
-    ImGui::Text("%s", log.c_str());
+    if (log.find("[WARNING]") != std::string::npos) {
+      ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 0, 255));
+      ImGui::Text("%s", log.c_str());
+      ImGui::PopStyleColor(1);
+    } else if (log.find("[ERROR]") != std::string::npos) {
+      ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+      ImGui::Text("%s", log.c_str());
+      ImGui::PopStyleColor(1);
+    } else {
+      ImGui::Text("%s", log.c_str());
+    }
   }
 
   // Auto scroll to last line
@@ -142,9 +153,19 @@ void MainView::update() {
 
   showConsole();
 
+  glBindTexture(GL_TEXTURE_2D, textures_[1]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width_, image_height_, 0, GL_RGB, GL_UNSIGNED_BYTE,
+               face_image_);
+
+  ImGui::Begin("Face detect");
+  ImGui::Image((void*)(intptr_t)textures_[1], ImVec2(image_width_, image_height_));
+  ImGui::End();
+
   ImGui::End();
 }
 
 void MainView::setImage(unsigned char* image) { image_ = image; }
 
-void MainView::setTexture(GLuint texture) { texture_ = texture; }
+void MainView::setFaceImage(unsigned char* image) { face_image_ = image; }
+
+void MainView::setTextures(GLuint* textures) { textures_ = textures; }

@@ -4,72 +4,61 @@
 #include <deque>
 #include <thread>
 #include <linux/joystick.h>
+#include <map>
 
-/**
- * Reads a joystick event from the joystick device.
- *
- * Returns 0 on success. Otherwise -1 is returned.
- */
-inline int read_event(int fd, struct js_event *event) {
-  ssize_t bytes;
+#define MAX_VALUE 32767
+#define DEAD_ZONE 3200
 
-  bytes = read(fd, event, sizeof(*event));
-
-  if (bytes == sizeof(*event)) return 0;
-
-  /* Error, could not read full event. */
-  return -1;
-}
-
-/**
- * Current state of an axis.
- */
-struct axis_state {
-  short x, y;
+struct JoystickInputs {
+  int lx = 0;
+  int ly = 0;
+  int rx = 0;
+  int ry = 0;
 };
 
-/**
- * Keeps track of the current axis state.
- *
- * NOTE: This function assumes that axes are numbered starting from 0, and that
- * the X axis is an even number, and the Y axis is an odd number. However, this
- * is usually a safe assumption.
- *
- * Returns the axis that the event indicated.
- */
-inline size_t get_axis_state(struct js_event *event, struct axis_state axes[3]) {
-  size_t axis = event->number / 2;
+enum JoystickAxis { LX = 0, LY = 1, RX = 3, RY = 4, LT = 2, RT = 5 };
 
-  if (axis < 3) {
-    if (event->number % 2 == 0)
-      axes[axis].x = event->value;
-    else
-      axes[axis].y = event->value;
-  }
+enum JoystickButtons {
+  A = 0,
+  B = 1,
+  Y = 2,
+  X = 3,
+  LB = 4,
+  RB = 5,
+  VIEW = 6,
+  MENU = 7,
+  XBOX = 8,
+  LEFT_CLICK = 9,
+  RIGHT_CLICK = 10
+};
 
-  return axis;
-}
-
-struct JoystickData {
-  int left_joystick_x = 0;
-  int left_joystick_y = 0;
-  int right_joystick_x = 0;
-  int right_joystick_y = 0;
+enum PSJoystickButtons {
+  CROSS = 0,
+  CIRCLE = 1,
+  TRIANGLE = 2,
+  SQUARE = 3,
+  L1 = 4,
+  R1 = 5,
+  L2 = 6,
+  R2 = 7,
+  SHARE = 8,
+  OPTIONS = 9,
+  HOME = 10,
+  L3 = 11,
+  R3 = 12
 };
 
 class Joystick {
  public:
   ~Joystick();
   void start();
-  bool getData(JoystickData &data);
+  JoystickInputs update();
+  bool readEvent(struct js_event* event);
 
  private:
-  const char *device_ = "/dev/input/js0";
+  const char* device_ = "/dev/input/js0";
   int js_;
-  struct js_event event_;
-  struct axis_state axes_[3] = {0};
-  int max_axis_value_ = 32767;
-  int dead_zone_ = 4000;
-  std::deque<JoystickData> data_;
-  std::thread th_;
+
+  std::map<JoystickAxis, int16_t> axis_;
+  std::map<PSJoystickButtons, int> buttons_;
 };

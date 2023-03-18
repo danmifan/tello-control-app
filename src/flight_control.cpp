@@ -38,11 +38,16 @@ int FlightControl::start() {
 
   th_ = std::thread([&]() {
     while (run_) {
+      bool rc_cmd = false;
       auto t1 = std::chrono::high_resolution_clock::now();
       if (!commands_.empty()) {
         time_since_last_command_ = 0;
         std::string command = commands_.back();
         commands_.pop_back();
+
+        if (command.find("rc") != std::string::npos) {
+          rc_cmd = true;
+        }
 
         int send_size = sendto(cmd_socket_, command.data(), command.size(), 0,
                                (struct sockaddr *)&cmd_addr_, sizeof(cmd_addr_));
@@ -68,15 +73,19 @@ int FlightControl::start() {
         }
       }
 
-      // The drone needs time between two commands
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      // The drone has a cooldown time between two commands
+      if (rc_cmd) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(RC_COOLDOWN_TIME));
+      } else {
+        std::this_thread::sleep_for(std::chrono::milliseconds(COOLDOWN_TIME));
+      }
 
       auto t2 = std::chrono::high_resolution_clock::now();
       time_since_last_command_ +=
           std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
       // Tello disables itself after 15 seconds without command
-      if (time_since_last_command_ > 10000) {
+      if (time_since_last_command_ > KEEP_ALIVE_TIME) {
         enableSDK();
       }
     }
@@ -121,5 +130,7 @@ void FlightControl::streamon() { commands_.emplace_front(std::string("streamon")
 void FlightControl::streamoff() { commands_.emplace_front(std::string("streamoff")); }
 
 void FlightControl::hover() { commands_.emplace_front(std::string("stop")); }
+
+void FlightControl::emergencyStop() { commands_.emplace_front(std::string("emergency")); }
 
 bool FlightControl::isFlying() { return is_flying_; }

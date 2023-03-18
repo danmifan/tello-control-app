@@ -8,6 +8,11 @@
 #include <atomic>
 #include <vector>
 
+// ms
+#define COOLDOWN_TIME 100
+#define RC_COOLDOWN_TIME 10
+#define KEEP_ALIVE_TIME 10000
+
 class FlightControl {
  public:
   ~FlightControl();
@@ -24,6 +29,7 @@ class FlightControl {
   void streamon();
   void streamoff();
   void hover();
+  void emergencyStop();
   bool isFlying();
 
  private:

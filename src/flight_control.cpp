@@ -38,18 +38,22 @@ int FlightControl::start() {
 
   th_ = std::thread([&]() {
     while (run_) {
-      auto t1 = std::chrono::high_resolution_clock::now();
-      if (!commands_.empty()) {
-        auto begin = std::chrono::high_resolution_clock::now();
-        int cooldown = 0;
+      auto th_begin = std::chrono::high_resolution_clock::now();
+      int cooldown = RC_COOLDOWN_TIME;
 
+      // Tello disables itself after 15 seconds without command
+      if (time_since_last_command_ > KEEP_ALIVE_TIME) {
+        Log::get().info("Keeping connection alive...");
+        enableSDK();
+      }
+
+      if (!commands_.empty()) {
         time_since_last_command_ = 0;
         std::string command = commands_.back();
         commands_.pop_back();
 
-        if (command.find("rc") != std::string::npos) {
-          cooldown = RC_COOLDOWN_TIME;
-        } else {
+        // Not a RC command
+        if (command.find("rc") == std::string::npos) {
           cooldown = COOLDOWN_TIME;
         }
 
@@ -75,25 +79,22 @@ int FlightControl::start() {
 
           delete test_answer;
         }
-
-        auto end = std::chrono::high_resolution_clock::now();
-        int elapsed_time =
-            std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-
-        int delta = cooldown - elapsed_time;
-        if (delta > 0) {
-          std::this_thread::sleep_for(std::chrono::milliseconds(delta));
-        }
       }
 
-      auto t2 = std::chrono::high_resolution_clock::now();
-      time_since_last_command_ +=
-          std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+      auto logic_end = std::chrono::high_resolution_clock::now();
+      int total_logic =
+          std::chrono::duration_cast<std::chrono::milliseconds>(logic_end - th_begin).count();
 
-      // Tello disables itself after 15 seconds without command
-      if (time_since_last_command_ > KEEP_ALIVE_TIME) {
-        enableSDK();
+      int delta = cooldown - total_logic;
+      if (delta > 0) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(delta));
       }
+
+      auto th_end = std::chrono::high_resolution_clock::now();
+      int total_th =
+          std::chrono::duration_cast<std::chrono::milliseconds>(th_end - th_begin).count();
+
+      time_since_last_command_ += total_th;
     }
   });
 

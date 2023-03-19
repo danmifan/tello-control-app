@@ -87,7 +87,8 @@ void MainView::showCommands() {
 void MainView::showConsole() {
   ImGui::Begin("Console");
 
-  std::vector<std::string> logs = Log::get().getLogs();
+#warning To do : get only last elements
+  std::list<std::string> logs = Log::get().getLogs();
 
   for (const auto& log : logs) {
     if (log.find("[WARNING]") != std::string::npos) {

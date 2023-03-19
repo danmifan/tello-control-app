@@ -60,4 +60,4 @@ void Log::warning(std::string msg) { message(Type::WARNING, msg); }
 
 void Log::error(std::string msg) { message(Type::ERROR, msg); }
 
-std::vector<std::string> Log::getLogs() { return logs_; }
+std::list<std::string> Log::getLogs() { return logs_; }

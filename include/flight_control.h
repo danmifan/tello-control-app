@@ -11,8 +11,8 @@
 #define COOLDOWN_TIME 100       // ms
 #define RC_COOLDOWN_TIME 10     // ms
 #define KEEP_ALIVE_TIME 10000   // ms
-#define COMMAND_TIMEOUT_SEC 0   // s
-#define COMMAND_TIMEOUT_USEC 1  // usec
+#define COMMAND_TIMEOUT_SEC 1   // s
+#define COMMAND_TIMEOUT_USEC 0  // usec
 
 class FlightControl {
  public:

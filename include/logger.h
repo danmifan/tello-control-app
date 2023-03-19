@@ -11,8 +11,9 @@
 #define CYAN "\033[36m"
 #define WHITE "\033[37m"
 
-#include <vector>
+#include <list>
 #include <string>
+#include <iostream>
 
 class Log {
  public:
@@ -20,7 +21,7 @@ class Log {
   void info(std::string msg);
   void warning(std::string msg);
   void error(std::string msg);
-  std::vector<std::string> getLogs();
+  std::list<std::string> getLogs();
 
  private:
   enum Type { INFO = 0, WARNING = 1, ERROR = 2 };
@@ -28,7 +29,7 @@ class Log {
   Log();
   void message(Type type, std::string msg);
 
-  std::vector<std::string> logs_;
+  std::list<std::string> logs_;
 };
 
 #endif  // LOGGER_H

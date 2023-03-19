@@ -31,7 +31,7 @@ int main(int /*argc*/, char** /*argv*/) {
     while (!stop) {
       JoystickInputs inputs;
       bool new_event = joystick.update(inputs);
-      if (flight_control.isFlying() && new_event) {
+      if (new_event) {
         flight_control.radioControl(inputs.lx, inputs.ly, inputs.ry, inputs.rx);
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(10));

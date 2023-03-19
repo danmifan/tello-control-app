@@ -8,10 +8,11 @@
 #include <atomic>
 #include <vector>
 
-// ms
-#define COOLDOWN_TIME 100
-#define RC_COOLDOWN_TIME 10
-#define KEEP_ALIVE_TIME 10000
+#define COOLDOWN_TIME 100       // ms
+#define RC_COOLDOWN_TIME 10     // ms
+#define KEEP_ALIVE_TIME 10000   // ms
+#define COMMAND_TIMEOUT_SEC 0   // s
+#define COMMAND_TIMEOUT_USEC 1  // usec
 
 class FlightControl {
  public:

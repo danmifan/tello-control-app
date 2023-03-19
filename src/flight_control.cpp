@@ -25,8 +25,8 @@ int FlightControl::start() {
 
   // Socket timeout
   struct timeval tv;
-  tv.tv_sec = 2;
-  tv.tv_usec = 0;
+  tv.tv_sec = COMMAND_TIMEOUT_SEC;
+  tv.tv_usec = COMMAND_TIMEOUT_USEC;
 
   setsockopt(cmd_socket_, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof(tv));
 
@@ -38,15 +38,19 @@ int FlightControl::start() {
 
   th_ = std::thread([&]() {
     while (run_) {
-      bool rc_cmd = false;
       auto t1 = std::chrono::high_resolution_clock::now();
       if (!commands_.empty()) {
+        auto begin = std::chrono::high_resolution_clock::now();
+        int cooldown = 0;
+
         time_since_last_command_ = 0;
         std::string command = commands_.back();
         commands_.pop_back();
 
         if (command.find("rc") != std::string::npos) {
-          rc_cmd = true;
+          cooldown = RC_COOLDOWN_TIME;
+        } else {
+          cooldown = COOLDOWN_TIME;
         }
 
         int send_size = sendto(cmd_socket_, command.data(), command.size(), 0,
@@ -71,13 +75,15 @@ int FlightControl::start() {
 
           delete test_answer;
         }
-      }
 
-      // The drone has a cooldown time between two commands
-      if (rc_cmd) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(RC_COOLDOWN_TIME));
-      } else {
-        std::this_thread::sleep_for(std::chrono::milliseconds(COOLDOWN_TIME));
+        auto end = std::chrono::high_resolution_clock::now();
+        int elapsed_time =
+            std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+
+        int delta = cooldown - elapsed_time;
+        if (delta > 0) {
+          std::this_thread::sleep_for(std::chrono::milliseconds(delta));
+        }
       }
 
       auto t2 = std::chrono::high_resolution_clock::now();
@@ -114,10 +120,10 @@ void FlightControl::takeoff() {
 
 void FlightControl::land() { commands_.emplace_front(std::string("land")); }
 
-void FlightControl::radioControl(int x, int y, int z, int yaw) {
+void FlightControl::radioControl(int a, int b, int c, int d) {
   std::string cmd = "rc ";
-  cmd += std::to_string(y) + " " + std::to_string(x) + " " + std::to_string(z) + " " +
-         std::to_string(yaw);
+  cmd += std::to_string(a) + " " + std::to_string(b) + " " + std::to_string(c) + " " +
+         std::to_string(d);
   commands_.emplace_front(cmd);
 }
 

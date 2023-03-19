@@ -7,7 +7,7 @@
 #include <map>
 
 #define MAX_VALUE 32767
-#define DEAD_ZONE 3200
+#define DEAD_ZONE 9600
 
 struct JoystickInputs {
   int lx = 0;
@@ -52,11 +52,11 @@ class Joystick {
  public:
   ~Joystick();
   void start();
-  JoystickInputs update();
+  bool update(JoystickInputs& inputs);
   bool readEvent(struct js_event* event);
 
  private:
-  const char* device_ = "/dev/input/js0";
+  std::string device_ = "/dev/input/js0";
   int js_;
 
   std::map<JoystickAxis, int16_t> axis_;

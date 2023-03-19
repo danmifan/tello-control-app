@@ -18,8 +18,14 @@ void Log::message(Type type, std::string msg) {
 
   std::time_t t = std::time(nullptr);
   std::tm tm = *std::localtime(&t);
+
+  auto now = std::chrono::system_clock::now();
+
+  auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+
   std::ostringstream ss;
   ss << std::put_time(&tm, "%H:%M:%S");
+  ss << " " << ms.count();
   std::string time_str = "[" + ss.str() + "] ";
 
   switch (type) {

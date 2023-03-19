@@ -29,9 +29,10 @@ int main(int /*argc*/, char** /*argv*/) {
 
   std::thread th([&]() {
     while (!stop) {
-      JoystickInputs inputs = joystick.update();
-      if (flight_control.isFlying()) {
-        flight_control.radioControl(inputs.lx, inputs.ly, inputs.rx, inputs.ry);
+      JoystickInputs inputs;
+      bool new_event = joystick.update(inputs);
+      if (flight_control.isFlying() && new_event) {
+        flight_control.radioControl(inputs.lx, inputs.ly, inputs.ry, inputs.rx);
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }

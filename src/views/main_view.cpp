@@ -57,7 +57,7 @@ void MainView::showCommands() {
   }
 
   if (ImGui::Button("Emergency")) {
-    std::cout << "Emergency" << std::endl;
+    fc_->emergencyStop();
   }
 
   if (ImGui::Button("Battery?")) {
@@ -87,7 +87,9 @@ void MainView::showCommands() {
 void MainView::showConsole() {
   ImGui::Begin("Console");
 
-  for (const auto& log : Log::get().getLogs()) {
+  std::vector<std::string> logs = Log::get().getLogs();
+
+  for (const auto& log : logs) {
     if (log.find("[WARNING]") != std::string::npos) {
       ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 0, 255));
       ImGui::Text("%s", log.c_str());

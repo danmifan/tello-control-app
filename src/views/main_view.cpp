@@ -13,8 +13,21 @@ void MainView::showDroneVideoFeed() {
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width_, image_height_, 0, GL_RGB, GL_UNSIGNED_BYTE,
                image_);
 
-  ImGui::Begin("Video feed");
-  ImGui::Image((void*)(intptr_t)textures_[0], ImVec2(image_width_, image_height_));
+  glBindTexture(GL_TEXTURE_2D, textures_[1]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width_, image_height_, 0, GL_RGB, GL_UNSIGNED_BYTE,
+               face_image_);
+
+  ImGui::Begin("Images");
+  ImGui::BeginTabBar("test");
+  if (ImGui::BeginTabItem("Video feed")) {
+    ImGui::Image((void*)(intptr_t)textures_[0], ImVec2(image_width_, image_height_));
+    ImGui::EndTabItem();
+  }
+  if (ImGui::BeginTabItem("Face detect")) {
+    ImGui::Image((void*)(intptr_t)textures_[1], ImVec2(image_width_, image_height_));
+    ImGui::EndTabItem();
+  }
+  ImGui::EndTabBar();
   ImGui::End();
 }
 
@@ -132,9 +145,7 @@ void MainView::update() {
 
   if (ImGui::BeginMenuBar()) {
     if (ImGui::BeginMenu("Menu")) {
-      if (ImGui::MenuItem("Demo")) {
-        show_demo_ = true;
-      }
+      ImGui::MenuItem("Demo", NULL, &show_demo_);
 
       ImGui::EndMenu();
     }
@@ -155,14 +166,6 @@ void MainView::update() {
   showCommands();
 
   showConsole();
-
-  glBindTexture(GL_TEXTURE_2D, textures_[1]);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width_, image_height_, 0, GL_RGB, GL_UNSIGNED_BYTE,
-               face_image_);
-
-  ImGui::Begin("Face detect");
-  ImGui::Image((void*)(intptr_t)textures_[1], ImVec2(image_width_, image_height_));
-  ImGui::End();
 
   ImGui::End();
 }

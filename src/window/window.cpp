@@ -43,7 +43,7 @@ int MyWindow::init() {
   ImGui_ImplOpenGL3_Init("#version 130");
 
   // Create texture
-  glGenTextures(2, image_textures_);
+  glGenTextures(3, image_textures_);
 
   // glActiveTexture(GL_TEXTURE0);
 
@@ -67,7 +67,14 @@ int MyWindow::init() {
 
   glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
-  glBindTexture(GL_TEXTURE_2D, image_textures_[1]);
+  glBindTexture(GL_TEXTURE_2D, image_textures_[2]);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
   return 1;
 }
@@ -132,7 +139,7 @@ void MyWindow::shutdown() {
   glfwTerminate();
   ImGui::DestroyContext();
 
-  glDeleteTextures(2, image_textures_);
+  glDeleteTextures(3, image_textures_);
 }
 
 void MyWindow::addWidget(AbstractWidget *widget) { widgets_.push_back(widget); }

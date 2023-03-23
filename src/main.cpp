@@ -7,6 +7,7 @@
 #include "joystick.h"
 #include "video_streaming.h"
 #include "face_detection.h"
+#include "image_processing.h"
 
 #include <signal.h>
 
@@ -20,12 +21,14 @@ int main(int /*argc*/, char** /*argv*/) {
   Joystick joystick;
   VideoStreaming stream(960, 720, 3);
   FaceDetection face_detection;
+  ImageProcessing processing;
 
   MainView view(&flight_control, &stream, 960, 720);
 
   flight_control.start();
   drone_status.start();
   joystick.start();
+  processing.start();
 
   std::thread th([&]() {
     while (!stop) {
@@ -54,14 +57,15 @@ int main(int /*argc*/, char** /*argv*/) {
   //   }
   // });
 
-#warning not exiting properly when closing window with an active stream
-
   window.init();
 
   window.addWidget(&view);
   view.setImage(stream.getImage());
   view.setFaceImage(face_detection.getFaceImage());
+  view.setImgProcImage(processing.getImage());
   view.setTextures(window.getTextures());
+  // processing.setImage(stream.getImage());
+  processing.setEvent(view.getEvent());
   window.update();
 
   window.shutdown();

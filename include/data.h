@@ -3,6 +3,11 @@
 
 #include <sys/time.h>
 
+struct Vec2i {
+  int x = 0;
+  int y = 0;
+};
+
 struct Vec3f {
   float x = 0.0f;
   float y = 0.0f;
@@ -13,6 +18,18 @@ struct Vec3i {
   int x = 0;
   int y = 0;
   int z = 0;
+};
+
+struct Vec4i {
+  int x = 0;
+  int y = 0;
+  int z = 0;
+  int w = 0;
+};
+
+struct Event {
+  bool active = false;
+  Vec2i data;
 };
 
 struct DroneState {

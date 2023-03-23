@@ -11,16 +11,18 @@
 
 class MainView : public AbstractWidget {
  public:
-  MainView(FlightControl* fc, VideoStreaming* vs, int image_width, int image_height)
-      : fc_(fc), vs_(vs), image_width_(image_width), image_height_(image_height) {}
+  MainView(FlightControl* fc, VideoStreaming* vs, int image_width, int image_height);
   void update() override;
   void showDroneVideoFeed();
   void showDroneStatus();
   void showCommands();
   void showConsole();
+  void showOverlay();
   void setImage(unsigned char* image);
-  void setFaceImage(unsigned char* face_image);
+  void setFaceImage(unsigned char* image);
+  void setImgProcImage(unsigned char* image);
   void setTextures(GLuint* textures);
+  Event* getEvent();
 
  private:
   DroneState current_state_;
@@ -28,10 +30,13 @@ class MainView : public AbstractWidget {
   VideoStreaming* vs_;
   unsigned char* image_;
   unsigned char* face_image_;
+  unsigned char* imgproc_image_;
   GLuint* textures_;
   int image_width_;
   int image_height_;
   bool show_demo_ = false;
+  Event* event_;
+  Vec4i battery_color_;
 };
 
 #endif  // MAIN_VIEW_H

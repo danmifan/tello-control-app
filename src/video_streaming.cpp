@@ -44,14 +44,14 @@ void VideoStreaming::start() {
       if (cap_.read(frame)) {
         if (!frame.empty()) {
 #warning memory leak
-          frames_.push_back(frame);
-
           cv::Mat cvt_frame;
 
           // does converting introduce delay ?
           cv::cvtColor(frame, cvt_frame, cv::COLOR_BGR2RGB);
           // std::cout << "Cvt : " << cvt_frame.size << std::endl;
           // std::cout << cv::typeToString(cvt_frame.type()) << std::endl;
+
+          frames_.push_back(cvt_frame);
 
           memcpy(image_, cvt_frame.data, 960 * 720 * 3);
         }

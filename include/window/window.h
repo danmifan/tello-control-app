@@ -24,7 +24,7 @@ class MyWindow {
   int height_;
   std::list<AbstractWidget*> widgets_;
   unsigned char* image_data_;
-  GLuint image_textures_[2];
+  GLuint image_textures_[3];
   int framerate_;
 };
 

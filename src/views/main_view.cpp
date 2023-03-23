@@ -8,6 +8,11 @@
 
 char buffer[256];
 
+MainView::MainView(FlightControl* fc, VideoStreaming* vs, int image_width, int image_height)
+    : fc_(fc), vs_(vs), image_width_(image_width), image_height_(image_height) {
+  event_ = new Event;
+}
+
 void MainView::showDroneVideoFeed() {
   glBindTexture(GL_TEXTURE_2D, textures_[0]);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width_, image_height_, 0, GL_RGB, GL_UNSIGNED_BYTE,
@@ -17,14 +22,33 @@ void MainView::showDroneVideoFeed() {
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width_, image_height_, 0, GL_RGB, GL_UNSIGNED_BYTE,
                face_image_);
 
+  glBindTexture(GL_TEXTURE_2D, textures_[2]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width_, image_height_, 0, GL_RGB, GL_UNSIGNED_BYTE,
+               imgproc_image_);
+
   ImGui::Begin("Images");
   ImGui::BeginTabBar("test");
   if (ImGui::BeginTabItem("Video feed")) {
     ImGui::Image((void*)(intptr_t)textures_[0], ImVec2(image_width_, image_height_));
+
+    if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
+      ImVec2 mousePositionAbsolute = ImGui::GetMousePos();
+      ImVec2 screenPositionAbsolute = ImGui::GetItemRectMin();
+      ImVec2 mousePositionRelative = ImVec2(mousePositionAbsolute.x - screenPositionAbsolute.x,
+                                            mousePositionAbsolute.y - screenPositionAbsolute.y);
+
+      event_->data.x = mousePositionRelative.x;
+      event_->data.y = mousePositionRelative.y;
+      event_->active = true;
+    }
     ImGui::EndTabItem();
   }
   if (ImGui::BeginTabItem("Face detect")) {
     ImGui::Image((void*)(intptr_t)textures_[1], ImVec2(image_width_, image_height_));
+    ImGui::EndTabItem();
+  }
+  if (ImGui::BeginTabItem("ImgProc")) {
+    ImGui::Image((void*)(intptr_t)textures_[2], ImVec2(image_width_, image_height_));
     ImGui::EndTabItem();
   }
   ImGui::EndTabBar();
@@ -43,7 +67,10 @@ void MainView::showDroneStatus() {
   ImGui::Text("Highest temperature : %i", current_state_.temph);
   ImGui::Text("Height : %i", current_state_.h);
   ImGui::Text("Baro : %f", current_state_.baro);
+  ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(battery_color_.x, battery_color_.y,
+                                                battery_color_.z, battery_color_.w));
   ImGui::Text("Battery : %i", current_state_.bat);
+  ImGui::PopStyleColor(1);
   ImGui::Text("TOF : %i", current_state_.tof);
   ImGui::Text("Time : %i", current_state_.time);
 
@@ -123,6 +150,26 @@ void MainView::showConsole() {
   ImGui::End();
 }
 
+void MainView::showOverlay() {
+  ImGuiIO& io = ImGui::GetIO();
+  ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking |
+                                  ImGuiWindowFlags_AlwaysAutoResize |
+                                  ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+
+  ImGui::SetNextWindowBgAlpha(0.35f);  // Transparent background
+  if (ImGui::Begin("Example: Simple overlay", NULL, window_flags)) {
+    ImGui::Text(
+        "Simple overlay\n"
+        "(right-click to change position)");
+    ImGui::Separator();
+    if (ImGui::IsMousePosValid())
+      ImGui::Text("Mouse Position: (%.1f,%.1f)", io.MousePos.x, io.MousePos.y);
+    else
+      ImGui::Text("Mouse Position: <invalid>");
+  }
+  ImGui::End();
+}
+
 void MainView::update() {
   if (!status_.empty()) {
     current_state_ = status_.back();
@@ -167,6 +214,18 @@ void MainView::update() {
 
   showConsole();
 
+  showOverlay();
+
+  if (current_state_.bat >= 0 && current_state_.bat <= 25) {
+    battery_color_ = {226, 15, 15, 204};
+  } else if (current_state_.bat > 25 && current_state_.bat <= 50) {
+    battery_color_ = {226, 107, 15, 204};
+  } else if (current_state_.bat > 50 && current_state_.bat <= 75) {
+    battery_color_ = {255, 218, 0, 204};
+  } else if (current_state_.bat > 75 && current_state_.bat <= 100) {
+    battery_color_ = {76, 227, 14, 204};
+  }
+
   ImGui::End();
 }
 
@@ -174,4 +233,8 @@ void MainView::setImage(unsigned char* image) { image_ = image; }
 
 void MainView::setFaceImage(unsigned char* image) { face_image_ = image; }
 
+void MainView::setImgProcImage(unsigned char* image) { imgproc_image_ = image; }
+
 void MainView::setTextures(GLuint* textures) { textures_ = textures; }
+
+Event* MainView::getEvent() { return event_; }

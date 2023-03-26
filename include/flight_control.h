@@ -8,11 +8,13 @@
 #include <atomic>
 #include <vector>
 
-#define COOLDOWN_TIME 100       // ms
-#define RC_COOLDOWN_TIME 10     // ms
-#define KEEP_ALIVE_TIME 10000   // ms
-#define COMMAND_TIMEOUT_SEC 1   // s
-#define COMMAND_TIMEOUT_USEC 0  // usec
+#define COOLDOWN_TIME 100          // ms
+#define RC_COOLDOWN_TIME 10        // ms
+#define KEEP_ALIVE_TIME 10000      // ms
+#define COMMAND_TIMEOUT_SEC 2      // s
+#define COMMAND_TIMEOUT_USEC 0     // usec
+#define RC_COMMAND_TIMEOUT_SEC 0   // s
+#define RC_COMMAND_TIMEOUT_USEC 1  // usec
 
 class FlightControl {
  public:
@@ -39,11 +41,12 @@ class FlightControl {
   int cmd_socket_;
   std::deque<std::string> commands_;
   bool last_message_status_ = false;
-  bool sdk_mode_enabled_ = false;
   std::thread th_;
   std::atomic<bool> run_ = {true};
   bool is_flying_ = false;
   int time_since_last_command_ = 0;
+  struct timeval tv_;
+  struct timeval rc_tv_;
 
   char* answer_buffer_ = nullptr;
 };

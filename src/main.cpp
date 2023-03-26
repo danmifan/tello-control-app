@@ -8,6 +8,7 @@
 #include "video_streaming.h"
 #include "face_detection.h"
 #include "image_processing.h"
+#include "logger.h"
 
 #include <signal.h>
 
@@ -21,9 +22,12 @@ int main(int /*argc*/, char** /*argv*/) {
   Joystick joystick;
   VideoStreaming stream(960, 720, 3);
   FaceDetection face_detection;
-  ImageProcessing processing;
+  ImageProcessing processing(&flight_control);
 
-  MainView view(&flight_control, &stream, 960, 720);
+#warning Get that value from the GUI in a better way
+  bool joystick_enabled = false;
+
+  MainView view(&flight_control, &stream, 960, 720, &joystick_enabled);
 
   flight_control.start();
   drone_status.start();
@@ -34,7 +38,7 @@ int main(int /*argc*/, char** /*argv*/) {
     while (!stop) {
       JoystickInputs inputs;
       bool new_event = joystick.update(inputs);
-      if (new_event) {
+      if (new_event && joystick_enabled) {
         flight_control.radioControl(inputs.lx, inputs.ly, inputs.ry, inputs.rx);
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(10));

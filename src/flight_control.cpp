@@ -24,11 +24,11 @@ int FlightControl::start() {
   answer_buffer_ = (char *)malloc(256);
 
   // Socket timeout
-  struct timeval tv;
-  tv.tv_sec = COMMAND_TIMEOUT_SEC;
-  tv.tv_usec = COMMAND_TIMEOUT_USEC;
+  tv_.tv_sec = COMMAND_TIMEOUT_SEC;
+  tv_.tv_usec = COMMAND_TIMEOUT_USEC;
 
-  setsockopt(cmd_socket_, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof(tv));
+  rc_tv_.tv_sec = RC_COMMAND_TIMEOUT_SEC;
+  rc_tv_.tv_usec = RC_COMMAND_TIMEOUT_USEC;
 
   cmd_addr_.sin_family = AF_INET;
   cmd_addr_.sin_addr.s_addr = inet_addr("192.168.10.1");
@@ -55,6 +55,11 @@ int FlightControl::start() {
         // Not a RC command
         if (command.find("rc") == std::string::npos) {
           cooldown = COOLDOWN_TIME;
+          // Probably not the best way to do this
+          setsockopt(cmd_socket_, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv_, sizeof(tv_));
+        } else {
+          // No answer is expected when sending RC commands
+          setsockopt(cmd_socket_, SOL_SOCKET, SO_RCVTIMEO, (const char *)&rc_tv_, sizeof(rc_tv_));
         }
 
         int send_size = sendto(cmd_socket_, command.data(), command.size(), 0,
@@ -119,7 +124,11 @@ void FlightControl::takeoff() {
   is_flying_ = true;
 }
 
-void FlightControl::land() { commands_.emplace_front(std::string("land")); }
+void FlightControl::land() {
+  // Emergency command have a higher priority
+  commands_.emplace_back(std::string("land"));
+  is_flying_ = false;
+}
 
 void FlightControl::radioControl(int a, int b, int c, int d) {
   std::string cmd = "rc ";
@@ -136,8 +145,15 @@ void FlightControl::streamon() { commands_.emplace_front(std::string("streamon")
 
 void FlightControl::streamoff() { commands_.emplace_front(std::string("streamoff")); }
 
-void FlightControl::hover() { commands_.emplace_front(std::string("stop")); }
+void FlightControl::hover() {
+  // Emergency command have a higher priority
+  commands_.emplace_back(std::string("stop"));
+}
 
-void FlightControl::emergencyStop() { commands_.emplace_front(std::string("emergency")); }
+void FlightControl::emergencyStop() {
+  // Emergency command have a higher priority
+  commands_.emplace_back(std::string("emergency"));
+  is_flying_ = false;
+}
 
 bool FlightControl::isFlying() { return is_flying_; }

@@ -7,6 +7,9 @@
 
 #warning tmp, will be written properly later
 
+#define VIDEO_WIDTH 960
+#define VIDEO_HEIGHT 720
+
 extern std::deque<DroneState> status_;
 extern std::deque<cv::Mat> frames_;
 

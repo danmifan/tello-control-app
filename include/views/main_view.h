@@ -11,7 +11,8 @@
 
 class MainView : public AbstractWidget {
  public:
-  MainView(FlightControl* fc, VideoStreaming* vs, int image_width, int image_height);
+  MainView(FlightControl* fc, VideoStreaming* vs, int image_width, int image_height,
+           bool* joystick_enabled);
   void update() override;
   void showDroneVideoFeed();
   void showDroneStatus();
@@ -37,6 +38,7 @@ class MainView : public AbstractWidget {
   bool show_demo_ = false;
   Event* event_;
   Vec4i battery_color_;
+  bool* joystick_enabled_;
 };
 
 #endif  // MAIN_VIEW_H

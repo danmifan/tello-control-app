@@ -8,9 +8,11 @@
 
 char buffer[256];
 
-MainView::MainView(FlightControl* fc, VideoStreaming* vs, int image_width, int image_height)
+MainView::MainView(FlightControl* fc, VideoStreaming* vs, int image_width, int image_height,
+                   bool* joystick_enabled)
     : fc_(fc), vs_(vs), image_width_(image_width), image_height_(image_height) {
   event_ = new Event;
+  joystick_enabled_ = joystick_enabled;
 }
 
 void MainView::showDroneVideoFeed() {
@@ -30,6 +32,14 @@ void MainView::showDroneVideoFeed() {
   ImGui::BeginTabBar("test");
   if (ImGui::BeginTabItem("Video feed")) {
     ImGui::Image((void*)(intptr_t)textures_[0], ImVec2(image_width_, image_height_));
+    ImGui::EndTabItem();
+  }
+  if (ImGui::BeginTabItem("Face detect")) {
+    ImGui::Image((void*)(intptr_t)textures_[1], ImVec2(image_width_, image_height_));
+    ImGui::EndTabItem();
+  }
+  if (ImGui::BeginTabItem("ImgProc")) {
+    ImGui::Image((void*)(intptr_t)textures_[2], ImVec2(image_width_, image_height_));
 
     if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
       ImVec2 mousePositionAbsolute = ImGui::GetMousePos();
@@ -41,14 +51,6 @@ void MainView::showDroneVideoFeed() {
       event_->data.y = mousePositionRelative.y;
       event_->active = true;
     }
-    ImGui::EndTabItem();
-  }
-  if (ImGui::BeginTabItem("Face detect")) {
-    ImGui::Image((void*)(intptr_t)textures_[1], ImVec2(image_width_, image_height_));
-    ImGui::EndTabItem();
-  }
-  if (ImGui::BeginTabItem("ImgProc")) {
-    ImGui::Image((void*)(intptr_t)textures_[2], ImVec2(image_width_, image_height_));
     ImGui::EndTabItem();
   }
   ImGui::EndTabBar();
@@ -120,6 +122,8 @@ void MainView::showCommands() {
     vs_->start();
     fc_->streamon();
   }
+
+  ImGui::Checkbox("Joystick", joystick_enabled_);
 
   ImGui::End();
 }

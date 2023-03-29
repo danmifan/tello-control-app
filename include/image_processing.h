@@ -1,15 +1,18 @@
 #ifndef IMAGE_PROCESSING_H
 #define IMAGE_PROCESSING_H
 
-#include <opencv2/core.hpp>
-#include <opencv2/tracking.hpp>
 #include <atomic>
 #include <thread>
+#include <math.h>
+
+#include <opencv2/core.hpp>
+#include <opencv2/tracking.hpp>
 
 #include "flight_control.h"
 #include "data.h"
 
 #define HFOV 50
+#define RAD_TO_DEG 180 / M_PI;
 
 class ImageProcessing {
  public:
@@ -31,6 +34,10 @@ class ImageProcessing {
   cv::Ptr<cv::Tracker> tracker_;
   bool tracker_running_ = false;
   FlightControl* fc_;
+
+  // Aruco
+  cv::Mat_<double> camera_matrix_;
+  cv::Mat_<double> dist_;
 };
 
 #endif  // IMAGE_PROCESSING_H

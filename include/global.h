@@ -2,6 +2,7 @@
 #define GLOBAL_H
 
 #include <deque>
+#include <map>
 #include "drone_status.h"
 #include <opencv2/core.hpp>
 
@@ -10,6 +11,7 @@
 #define VIDEO_WIDTH 960
 #define VIDEO_HEIGHT 720
 
+extern std::map<std::string, int> thread_time_;
 extern std::deque<DroneState> status_;
 extern std::deque<cv::Mat> frames_;
 

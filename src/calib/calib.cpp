@@ -44,8 +44,12 @@ int main(int argc, char** argv) {
       for (int x = 0; x < 9; ++x) objectPoints.push_back(cv::Point3f(x * 0.025, y * 0.025, 0));
     }
 
-    std::string image_name = "calib_" + std::to_string(i) + ".jpg";
+    std::string image_name = "calib/calib_" + std::to_string(i) + ".jpg";
     cv::Mat image = cv::imread(image_name);
+
+    if (image.empty()) {
+      continue;
+    }
 
     cv::Mat gray_image;
     cv::cvtColor(image, gray_image, cv::COLOR_BGR2GRAY);
@@ -77,7 +81,7 @@ int main(int argc, char** argv) {
     // if (cv::waitKey() > 0) {
     //   continue;
     // }
-    std::cout << image.size() << std::endl;
+    // std::cout << image.size() << std::endl;
   }
 
   cv::Mat camera_matrix, dist_coeff, R, T;
@@ -85,15 +89,15 @@ int main(int argc, char** argv) {
   cv::calibrateCamera(objectPointsArray, imagePointsArray, image_size, camera_matrix, dist_coeff, R,
                       T);
 
-  std::vector<cv::Point2f> points = {cv::Point2f(960, 720)};
-  std::vector<cv::Point2f> undisorted_points;
-  cv::undistortPoints(points, undisorted_points, camera_matrix, dist_coeff);
+  // std::vector<cv::Point2f> points = {cv::Point2f(960, 720)};
+  // std::vector<cv::Point2f> undisorted_points;
+  // cv::undistortPoints(points, undisorted_points, camera_matrix, dist_coeff);
 
-  std::cout << points << std::endl;
-  for (const auto& undis : undisorted_points) {
-    std::cout << undis << std::endl;
-    // std::cout << undis.x * 960 << " " << undis.y * 720 << std::endl;
-  }
+  // std::cout << points << std::endl;
+  // for (const auto& undis : undisorted_points) {
+  //   std::cout << undis << std::endl;
+  //   // std::cout << undis.x * 960 << " " << undis.y * 720 << std::endl;
+  // }
 
   // for (const auto& image : images) {
   //   cv::Mat undistorted;
@@ -107,8 +111,8 @@ int main(int argc, char** argv) {
   //   }
   // }
 
-  std::cout << camera_matrix << std::endl;
-  // std::cout << dist_coeff << std::endl;
+  std::cout << "Camera matrix : " << camera_matrix << std::endl;
+  std::cout << "Dist coeff : " << dist_coeff << std::endl;
   // std::cout << R << std::endl;
   // std::cout << T << std::endl;
 

@@ -166,10 +166,15 @@ void MainView::showOverlay() {
         "Simple overlay\n"
         "(right-click to change position)");
     ImGui::Separator();
-    if (ImGui::IsMousePosValid())
+    if (ImGui::IsMousePosValid()) {
       ImGui::Text("Mouse Position: (%.1f,%.1f)", io.MousePos.x, io.MousePos.y);
-    else
+    } else {
       ImGui::Text("Mouse Position: <invalid>");
+    }
+
+    for (const auto& time : thread_time_) {
+      ImGui::Text("%s :  %i ms", time.first.c_str(), time.second);
+    }
   }
   ImGui::End();
 }

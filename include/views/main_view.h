@@ -2,21 +2,16 @@
 #define MAIN_VIEW_H
 
 #include "data.h"
-#include "window/abstract_widget.h"
-#include "flight_control.h"
-#include "video_streaming.h"
+#include "window/aview.h"
 #include <GL/gl.h>
 
 #include "global.h"
 
-class MainView : public AbstractWidget {
+class MainView : public AView {
  public:
-  MainView(FlightControl* fc, VideoStreaming* vs, int image_width, int image_height,
-           bool* joystick_enabled);
+  MainView(int image_width, int image_height);
   void update() override;
   void showDroneVideoFeed();
-  void showDroneStatus();
-  void showCommands();
   void showConsole();
   void showOverlay();
   void setImage(unsigned char* image);
@@ -26,9 +21,6 @@ class MainView : public AbstractWidget {
   Event* getEvent();
 
  private:
-  DroneState current_state_;
-  FlightControl* fc_;
-  VideoStreaming* vs_;
   unsigned char* image_;
   unsigned char* face_image_;
   unsigned char* imgproc_image_;
@@ -37,8 +29,6 @@ class MainView : public AbstractWidget {
   int image_height_;
   bool show_demo_ = false;
   Event* event_;
-  Vec4i battery_color_;
-  bool* joystick_enabled_;
 };
 
 #endif  // MAIN_VIEW_H

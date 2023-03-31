@@ -95,10 +95,29 @@ void MyWindow::update() {
 
     // ImGui::ShowDemoWindow();
 
-    // Widgets
-    for (const auto &widget : widgets_) {
-      widget->update();
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+    const ImGuiViewport *viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->WorkPos);
+    ImGui::SetNextWindowSize(viewport->WorkSize);
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+    ImGui::Begin("Dockspace", NULL, window_flags);
+    ImGui::PopStyleVar(2);
+
+    ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+    ImGui::DockSpace(dockspace_id, ImVec2(0, 0));
+
+    // Views
+    for (const auto &view : views_) {
+      view->update();
     }
+
+    ImGui::End();
 
     ImGui::Render();
 
@@ -129,8 +148,8 @@ void MyWindow::update() {
 }
 
 void MyWindow::shutdown() {
-  for (const auto &widget : widgets_) {
-    widget->shutdown();
+  for (const auto &view : views_) {
+    view->shutdown();
   }
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
@@ -142,7 +161,7 @@ void MyWindow::shutdown() {
   glDeleteTextures(3, image_textures_);
 }
 
-void MyWindow::addWidget(AbstractWidget *widget) { widgets_.push_back(widget); }
+void MyWindow::addView(AView *view) { views_.push_back(view); }
 
 unsigned char *MyWindow::getImage() { return image_data_; }
 

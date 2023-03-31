@@ -1,19 +1,25 @@
 #include "joystick.h"
 
+#include <linux/joystick.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <unistd.h>
+
 #include "logger.h"
-#include <iostream>
 
 Joystick::~Joystick() { close(js_); }
 
 int clip(int n, int lower, int upper) { return std::max(lower, std::min(n, upper)); }
 
-void Joystick::start() {
+bool Joystick::init() {
   js_ = open(device_.c_str(), O_RDONLY | O_NONBLOCK);
 
-  if (js_ == -1) {
+  if (js_ < 0) {
     Log::get().error("Could not open joystick device : " + device_);
+    return false;
   } else {
     Log::get().info(device_ + " successfully opened");
+    return true;
   }
 }
 
@@ -52,6 +58,30 @@ bool Joystick::update(JoystickInputs& inputs) {
   inputs.ly = clip(inputs.ly, -100, 100);
   inputs.rx = clip(inputs.rx, -100, 100);
   inputs.ry = clip(inputs.ry, -100, 100);
+
+  inputs.cross_pressed = buttons_[PSJoystickButtons::CROSS];
+  inputs.circle_pressed = buttons_[PSJoystickButtons::CIRCLE];
+  inputs.square_pressed = buttons_[PSJoystickButtons::SQUARE],
+  inputs.triangle_pressed = buttons_[PSJoystickButtons::TRIANGLE];
+  inputs.rstick_button_pressed = buttons_[PSJoystickButtons::R3];
+
+  if (previous_inputs_.cross_pressed && !inputs.cross_pressed) {
+    inputs.cross_up = true;
+  }
+  if (previous_inputs_.circle_pressed && !inputs.circle_pressed) {
+    inputs.circle_up = true;
+  }
+  if (previous_inputs_.square_pressed && !inputs.square_pressed) {
+    inputs.square_up = true;
+  }
+  if (previous_inputs_.triangle_pressed && !inputs.triangle_pressed) {
+    inputs.triangle_up = true;
+  }
+  if (previous_inputs_.rstick_button_pressed && !inputs.rstick_button_pressed) {
+    inputs.rstick_button_up = true;
+  }
+
+  previous_inputs_ = inputs;
 
   return new_event;
 }

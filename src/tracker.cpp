@@ -1,10 +1,12 @@
 #include "tracker.h"
 
-Tracker::Tracker() { cv_tracker_ = cv::TrackerKCF::create(); }
+#include "logger.h"
+
+Tracker::Tracker() { cv_tracker_ = cv::TrackerMedianFlow::create(); }
 
 void Tracker::setEvent(Event* event) { event_ = event; }
 
-bool Tracker::track(cv::Mat frame, Vec2i& target) {
+bool Tracker::track(cv::Mat frame, TrackData& target) {
   if (event_->active) {
     int tl_x = event_->data.x - rect_width_ / 2;
     int tl_y = event_->data.y - rect_height_ / 2;
@@ -24,7 +26,7 @@ bool Tracker::track(cv::Mat frame, Vec2i& target) {
       init_ = true;
     } else {
       cv_tracker_->clear();
-      cv_tracker_ = cv::TrackerKCF::create();
+      cv_tracker_ = cv::TrackerMedianFlow::create();
       cv_tracker_->init(frame, rect);
     }
   }
@@ -46,7 +48,10 @@ bool Tracker::track(cv::Mat frame, Vec2i& target) {
       int dx = target_center_x - (960 / 2);
       int dy = target_center_y - (720 / 2);
 
-      target = {dx, dy};
+      Log::get().info("Width : " + std::to_string(tracked_object.width) +
+                      " height : " + std::to_string(tracked_object.height));
+
+      target = {dx, dy, tracked_object.width, tracked_object.height};
       return true;
 
       // Log::get().info("dx : " + std::to_string(dx) + " dy : " + std::to_string(dy));

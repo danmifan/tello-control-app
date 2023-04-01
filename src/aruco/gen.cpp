@@ -3,7 +3,7 @@
 #include <opencv2/aruco.hpp>
 #include <opencv2/highgui.hpp>
 
-int main(int argc, char** argv) {
+int main(int /*argc*/, char** /*argv*/) {
   cv::Mat markerImage;
   cv::Ptr<cv::aruco::Dictionary> dictionary =
       cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);

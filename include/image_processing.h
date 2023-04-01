@@ -7,10 +7,12 @@
 
 #include <opencv2/core.hpp>
 
+#include "face_detection.h"
 #include "flight_control.h"
 #include "tracker.h"
 #include "aruco_detector.h"
 #include "pid_controller.h"
+#include "file_logger.h"
 
 #define HFOV 50
 
@@ -32,9 +34,12 @@ class ImageProcessing {
   // CV
   Tracker tracker_;
   ArucoDetector aruco_detector_;
+  FaceDetection face_detection_;
 
   // PID
   PIDController pid_;
+
+  FileLogger file_;
 };
 
 #endif  // IMAGE_PROCESSING_H

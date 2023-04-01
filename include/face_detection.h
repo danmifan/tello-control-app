@@ -1,17 +1,15 @@
 #ifndef FACE_DETECTION_H
 #define FACE_DETECTION_H
 
-#include <opencv2/objdetect.hpp>
+#include <opencv2/dnn.hpp>
 
 class FaceDetection {
  public:
   FaceDetection();
   void detect(const cv::Mat& frame);
-  unsigned char* getFaceImage();
 
  private:
-  cv::CascadeClassifier cascade_;
-  unsigned char* face_image_;
+  cv::dnn::dnn4_v20191202::Net net_;
 };
 
 #endif  // FACE_DETECTION_H

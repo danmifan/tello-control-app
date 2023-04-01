@@ -14,9 +14,10 @@ void MainView::showDroneVideoFeed() {
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width_, image_height_, 0, GL_RGB, GL_UNSIGNED_BYTE,
                image_);
 
-  glBindTexture(GL_TEXTURE_2D, textures_[1]);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width_, image_height_, 0, GL_RGB, GL_UNSIGNED_BYTE,
-               face_image_);
+  // glBindTexture(GL_TEXTURE_2D, textures_[1]);
+  // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width_, image_height_, 0, GL_RGB,
+  // GL_UNSIGNED_BYTE,
+  //              face_image_);
 
   glBindTexture(GL_TEXTURE_2D, textures_[2]);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width_, image_height_, 0, GL_RGB, GL_UNSIGNED_BYTE,
@@ -28,10 +29,10 @@ void MainView::showDroneVideoFeed() {
     ImGui::Image((void*)(intptr_t)textures_[0], ImVec2(image_width_, image_height_));
     ImGui::EndTabItem();
   }
-  if (ImGui::BeginTabItem("Face detect")) {
-    ImGui::Image((void*)(intptr_t)textures_[1], ImVec2(image_width_, image_height_));
-    ImGui::EndTabItem();
-  }
+  // if (ImGui::BeginTabItem("Face detect")) {
+  //   ImGui::Image((void*)(intptr_t)textures_[1], ImVec2(image_width_, image_height_));
+  //   ImGui::EndTabItem();
+  // }
   if (ImGui::BeginTabItem("ImgProc")) {
     ImGui::Image((void*)(intptr_t)textures_[2], ImVec2(image_width_, image_height_));
 
@@ -124,8 +125,6 @@ void MainView::update() {
 }
 
 void MainView::setImage(unsigned char* image) { image_ = image; }
-
-void MainView::setFaceImage(unsigned char* image) { face_image_ = image; }
 
 void MainView::setImgProcImage(unsigned char* image) { imgproc_image_ = image; }
 

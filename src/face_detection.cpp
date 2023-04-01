@@ -3,34 +3,31 @@
 #include <opencv2/imgproc.hpp>
 #include <logger.h>
 
-#include "debug_chrono.h"
-
 FaceDetection::FaceDetection() {
-  cv::String filename = cv::samples::findFile("data/haarcascade_frontalface_alt.xml");
-  if (!cascade_.load(filename)) {
-    Log::get().error("Could not load cascade samples");
-    return;
-  }
+  net_ = cv::dnn::readNetFromCaffe("dnn/deploy.prototxt",
+                                   "dnn/res10_300x300_ssd_iter_140000_fp16.caffemodel");
 
-  face_image_ = (unsigned char*)malloc(960 * 720 * 3);
+  // net.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
+  // net.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
 }
 
 void FaceDetection::detect(const cv::Mat& frame) {
-  cv::Mat gray;
-  cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
-  cv::equalizeHist(gray, gray);
+  // Face detect
+  cv::Mat blob = cv::dnn::blobFromImage(frame, 1.0, cv::Size(300, 300));
 
-  std::vector<cv::Rect> faces;
-  CLOCK_MS(cascade_.detectMultiScale(gray, faces), "cascade");
-
-  Log::get().info("Faces : " + std::to_string(faces.size()));
-  for (const auto& face : faces) {
-    cv::rectangle(frame, face, cv::Scalar(0, 255, 0));
+  net_.setInput(blob);
+  cv::Mat detect = net_.forward();
+  cv::Mat detectionMat = cv::Mat(detect.size[2], detect.size[3], CV_32F, detect.ptr<float>());
+  for (int i = 0; i < detectionMat.rows; i++) {
+    float confidence = detectionMat.at<float>(i, 2);
+    if (confidence > 0.7) {
+      std::cout << "Confidence : " << confidence << std::endl;
+      int box_x = static_cast<int>(detectionMat.at<float>(i, 3) * frame.cols);
+      int box_y = static_cast<int>(detectionMat.at<float>(i, 4) * frame.rows);
+      int box_width = static_cast<int>(detectionMat.at<float>(i, 5) * frame.cols - box_x);
+      int box_height = static_cast<int>(detectionMat.at<float>(i, 6) * frame.rows - box_y);
+      cv::rectangle(frame, cv::Point(box_x, box_y),
+                    cv::Point(box_x + box_width, box_y + box_height), cv::Scalar(255, 255, 255), 2);
+    }
   }
-
-  cv::Mat tmp;
-  cv::cvtColor(frame, tmp, cv::COLOR_BGR2RGB);
-  memcpy(face_image_, tmp.data, 960 * 720 * 3);
 }
-
-unsigned char* FaceDetection::getFaceImage() { return face_image_; }

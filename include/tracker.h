@@ -4,11 +4,18 @@
 #include <opencv2/tracking.hpp>
 #include "data.h"
 
+struct TrackData {
+  int dx;
+  int dy;
+  double width;
+  double height;
+};
+
 class Tracker {
  public:
   Tracker();
   void setEvent(Event* event);
-  bool track(cv::Mat frame, Vec2i& target);
+  bool track(cv::Mat frame, TrackData& target);
 
  private:
   cv::Ptr<cv::Tracker> cv_tracker_;

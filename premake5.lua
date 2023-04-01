@@ -128,34 +128,34 @@ project "tello-control-app"
 --     "src/calib/calib.cpp"
 --   }
 
-project "aruco_gen"
-  kind "ConsoleApp"
-  language "C++"
-  targetdir "bin/"
+-- project "aruco_gen"
+--   kind "ConsoleApp"
+--   language "C++"
+--   targetdir "bin/"
 
-  buildoptions { "`pkg-config --cflags opencv4`"}
-  linkoptions {"`pkg-config --libs opencv4`" }
+--   buildoptions { "`pkg-config --cflags opencv4`"}
+--   linkoptions {"`pkg-config --libs opencv4`" }
 
 
-  -- includedirs {
-  --   "/usr/local/include/opencv4"
-  -- }
+--   -- includedirs {
+--   --   "/usr/local/include/opencv4"
+--   -- }
 
-  -- libdirs {
-  --   "/usr/local/lib"
-  -- }
+--   -- libdirs {
+--   --   "/usr/local/lib"
+--   -- }
 
-  -- links {
-  --   "pthread",
-  --   "opencv_core",
-  --   "opencv_highgui",
-  --   "opencv_videoio",
-  --   "opencv_imgproc"
-  -- }
+--   -- links {
+--   --   "pthread",
+--   --   "opencv_core",
+--   --   "opencv_highgui",
+--   --   "opencv_videoio",
+--   --   "opencv_imgproc"
+--   -- }
 
-  files {
-    "src/aruco/gen.cpp"
-  }
+--   files {
+--     "src/aruco/gen.cpp"
+--   }
 
 
 -- project "stream_test"
@@ -185,4 +185,33 @@ project "aruco_gen"
 
 --   files {
 --     "src/stream_test/stream_test.cpp"
+--   }
+
+-- project "dnn_test"
+--   kind "ConsoleApp"
+--   language "C++"
+--   targetdir "bin/"
+
+--   buildoptions { "`pkg-config --cflags opencv4`"}
+--   linkoptions {"`pkg-config --libs opencv4`" }
+
+
+--   -- includedirs {
+--   --   "/usr/local/include/opencv4"
+--   -- }
+
+--   -- libdirs {
+--   --   "/usr/local/lib"
+--   -- }
+
+--   -- links {
+--   --   "pthread",
+--   --   "opencv_core",
+--   --   "opencv_highgui",
+--   --   "opencv_videoio",
+--   --   "opencv_imgproc"
+--   -- }
+
+--   files {
+--     "src/dnn/dnn_test.cpp"
 --   }

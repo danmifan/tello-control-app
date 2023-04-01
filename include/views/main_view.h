@@ -15,14 +15,12 @@ class MainView : public AView {
   void showConsole();
   void showOverlay();
   void setImage(unsigned char* image);
-  void setFaceImage(unsigned char* image);
   void setImgProcImage(unsigned char* image);
   void setTextures(GLuint* textures);
   Event* getEvent();
 
  private:
   unsigned char* image_;
-  unsigned char* face_image_;
   unsigned char* imgproc_image_;
   GLuint* textures_;
   int image_width_;

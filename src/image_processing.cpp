@@ -3,6 +3,7 @@
 #include <thread>
 
 #include <opencv2/core/utility.hpp>
+#include <opencv2/imgcodecs.hpp>
 
 #include "data.h"
 #include "logger.h"
@@ -25,6 +26,7 @@ ImageProcessing::~ImageProcessing() {
 
 void ImageProcessing::start() {
   run_ = true;
+
   th_ = std::thread([&]() {
     while (run_) {
       auto t1 = std::chrono::high_resolution_clock::now();
@@ -32,22 +34,33 @@ void ImageProcessing::start() {
         cv::Mat frame = frames_.back();
         frames_.pop_back();
 
-        // track
-        Vec2i target;
-        if (tracker_.track(frame, target)) {
-          // Correct
-          target.x = clamp(target.x, -100, 100);
-          target.y = clamp(target.y, -100, 100);
+        // Face detection
+        face_detection_.detect(frame);
 
-          int yaw_cmd = target.x * 0.5;
-          int z = -target.y * 0.5;
-
-          fc_->radioControl(0, 0, z, yaw_cmd);
-
-          // pid_.correct();
-        }
-        // aruco
+        // Aruco
         // aruco_detector_.detect(frame);
+
+        // track
+        // TrackData target;
+        // if (tracker_.track(frame, target)) {
+        //   // Correct
+        //   target.dx = clamp(target.dx, -100, 100);
+        //   target.dy = clamp(target.dy, -100, 100);
+
+        //   // int yaw_cmd = target.dx * 0.5;
+        //   // int z_cmd = -target.dy * 0.5;
+
+        //   int yaw_cmd = target.dx * 0.75;
+        //   int z_cmd = -target.dy * 0.75;
+
+        //   fc_->radioControl(0, 0, z_cmd, yaw_cmd);
+
+        //   file_.write(yaw_cmd, -z_cmd, target.dx, target.dy);
+
+        //   // pid_.correct();
+        // }
+
+        cv::cvtColor(frame, frame, CV_BGR2RGB);
 
         memcpy(image_, frame.data, 960 * 720 * 3);
       }

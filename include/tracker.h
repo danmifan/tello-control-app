@@ -2,11 +2,11 @@
 #define TRACKER_H
 
 #include <opencv2/tracking.hpp>
+#include <opencv2/tracking/tracking_legacy.hpp>
 #include "data.h"
 
 struct TrackData {
-  int dx;
-  int dy;
+  Vec2i position;
   double width;
   double height;
 };
@@ -18,7 +18,7 @@ class Tracker {
   bool track(cv::Mat frame, TrackData& target);
 
  private:
-  cv::Ptr<cv::Tracker> cv_tracker_;
+  cv::Ptr<cv::legacy::TrackerMedianFlow> cv_tracker_;
   bool init_ = false;
   int rect_width_ = 160;
   int rect_height_ = 100;

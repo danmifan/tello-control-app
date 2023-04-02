@@ -48,7 +48,7 @@ void ArucoDetector::detect(cv::Mat frame) {
 
     // draw axis for each marker
     for (int i = 0; i < markerIds.size(); i++) {
-      cv::aruco::drawAxis(frame, camera_matrix_, dist_, rvecs[i], tvecs[i], 0.1);
+      cv::drawFrameAxes(frame, camera_matrix_, dist_, rvecs[i], tvecs[i], 0.1);
 
       cv::Mat m_rot;
 

@@ -11,7 +11,6 @@
 #include "flight_control.h"
 #include "tracker.h"
 #include "aruco_detector.h"
-#include "pid_controller.h"
 #include "file_logger.h"
 
 #define HFOV 50
@@ -35,9 +34,6 @@ class ImageProcessing {
   Tracker tracker_;
   ArucoDetector aruco_detector_;
   FaceDetection face_detection_;
-
-  // PID
-  PIDController pid_;
 
   FileLogger file_;
 };

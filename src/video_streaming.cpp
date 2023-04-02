@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <opencv2/cudacodec.hpp>
 
 #include "global.h"
 
@@ -40,6 +41,7 @@ void VideoStreaming::start() {
     }
 
     while (run_) {
+      auto t1 = std::chrono::high_resolution_clock::now();
       cv::Mat frame;
       if (cap_.read(frame)) {
         if (!frame.empty()) {
@@ -54,6 +56,15 @@ void VideoStreaming::start() {
         }
       } else {
         std::cout << "no frame" << std::endl;
+      }
+
+      auto t2 = std::chrono::high_resolution_clock::now();
+      int duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+
+      int delta = 33 - duration_ms;
+
+      if (delta > 0) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(delta));
       }
     }
     cap_.release();

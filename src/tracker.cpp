@@ -2,7 +2,7 @@
 
 #include "logger.h"
 
-Tracker::Tracker() { cv_tracker_ = cv::TrackerMedianFlow::create(); }
+Tracker::Tracker() { cv_tracker_ = cv::legacy::TrackerMedianFlow::create(); }
 
 void Tracker::setEvent(Event* event) { event_ = event; }
 
@@ -15,8 +15,8 @@ bool Tracker::track(cv::Mat frame, TrackData& target) {
 
     cv::rectangle(frame, rect, cv::Scalar(255, 255, 255, 255));
 
-    int delta_pos_x = -(960 / 2 - event_->data.x);
-    int delta_pos_y = -(720 / 2 - event_->data.y);
+    // int delta_pos_x = -(960 / 2 - event_->data.x);
+    // int delta_pos_y = -(720 / 2 - event_->data.y);
     event_->active = false;
     // Log::get().info(std::to_string(delta_pos_.x) + " " +
     // std::to_string(delta_pos_.y);
@@ -26,7 +26,7 @@ bool Tracker::track(cv::Mat frame, TrackData& target) {
       init_ = true;
     } else {
       cv_tracker_->clear();
-      cv_tracker_ = cv::TrackerMedianFlow::create();
+      cv_tracker_ = cv::legacy::TrackerMedianFlow::create();
       cv_tracker_->init(frame, rect);
     }
   }
@@ -37,7 +37,7 @@ bool Tracker::track(cv::Mat frame, TrackData& target) {
     if (cv_tracker_->update(frame, tracked_object)) {
       cv::rectangle(frame, tracked_object, cv::Scalar(0, 255, 0, 255));
 
-      cv::circle(frame, cv::Point(960 / 2, 720 / 2), 10, cv::Scalar(255, 0, 0, 255));
+      cv::circle(frame, cv::Point(960 / 2, 720 / 2), 10, cv::Scalar(0, 0, 255, 255));
 
       int target_center_x = tracked_object.x + tracked_object.width / 2;
       int target_center_y = tracked_object.y + tracked_object.height / 2;
@@ -45,13 +45,17 @@ bool Tracker::track(cv::Mat frame, TrackData& target) {
       cv::circle(frame, cv::Point(target_center_x, target_center_y), 10,
                  cv::Scalar(255, 255, 255, 255));
 
-      int dx = target_center_x - (960 / 2);
-      int dy = target_center_y - (720 / 2);
+      cv::line(frame, cv::Point(960 / 2, 720 / 2), cv::Point(target_center_x, target_center_y),
+               cv::Scalar(255, 255, 255, 255));
+
+      // int dx = target_center_x - (960 / 2);
+      // int dy = target_center_y - (720 / 2);
 
       Log::get().info("Width : " + std::to_string(tracked_object.width) +
                       " height : " + std::to_string(tracked_object.height));
 
-      target = {dx, dy, tracked_object.width, tracked_object.height};
+      Vec2i position = {target_center_x, target_center_y};
+      target = {position, tracked_object.width, tracked_object.height};
       return true;
 
       // Log::get().info("dx : " + std::to_string(dx) + " dy : " + std::to_string(dy));

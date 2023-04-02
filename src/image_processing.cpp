@@ -9,6 +9,7 @@
 #include "logger.h"
 #include "global.h"
 #include "utils.h"
+#include "pid_controller.h"
 
 std::map<std::string, int> thread_time_;
 
@@ -28,6 +29,9 @@ void ImageProcessing::start() {
   run_ = true;
 
   th_ = std::thread([&]() {
+    PIDController z_pid(0.7, 0.0001, 0.1);
+    PIDController yaw_pid(0.7, 0.0001, 0.1);
+
     while (run_) {
       auto t1 = std::chrono::high_resolution_clock::now();
       if (!frames_.empty()) {
@@ -35,32 +39,37 @@ void ImageProcessing::start() {
         frames_.pop_back();
 
         // Face detection
-        face_detection_.detect(frame);
+        // face_detection_.detect(frame);
 
         // Aruco
         // aruco_detector_.detect(frame);
 
-        // track
-        // TrackData target;
-        // if (tracker_.track(frame, target)) {
-        //   // Correct
-        //   target.dx = clamp(target.dx, -100, 100);
-        //   target.dy = clamp(target.dy, -100, 100);
+        // Track
+        TrackData target;
+        if (tracker_.track(frame, target)) {
+          // Correct
 
-        //   // int yaw_cmd = target.dx * 0.5;
-        //   // int z_cmd = -target.dy * 0.5;
+#warning Sortir PID de la condition
+          float z_cmd = z_pid.correct(720 / 2, target.position.y);
+          float yaw_cmd = yaw_pid.correct(960 / 2, target.position.x);
 
-        //   int yaw_cmd = target.dx * 0.75;
-        //   int z_cmd = -target.dy * 0.75;
+          int z_cmd_i = z_cmd;
+          int yaw_cmd_i = yaw_cmd;
 
-        //   fc_->radioControl(0, 0, z_cmd, yaw_cmd);
+          Log::get().info("PID : " + std::to_string(z_cmd) + " " + std::to_string(yaw_cmd));
 
-        //   file_.write(yaw_cmd, -z_cmd, target.dx, target.dy);
+          // int yaw_cmd = target.dx * 0.5;
+          // int z_cmd = -target.dy * 0.5;
 
-        //   // pid_.correct();
-        // }
+          // int yaw_cmd = target.dx * 0.75;
+          // int z_cmd = -target.dy * 0.75;
 
-        cv::cvtColor(frame, frame, CV_BGR2RGB);
+          // fc_->radioControl(0, 0, z_cmd, yaw_cmd);
+
+          // file_.write(yaw_cmd, -z_cmd, target.dx, target.dy);
+        }
+
+        cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
 
         memcpy(image_, frame.data, 960 * 720 * 3);
       }
@@ -79,9 +88,7 @@ void ImageProcessing::start() {
 
       thread_time_["ImgProc"] = total_time;
 
-      // Log::get().info("Imgproc : " + std::to_string(duration_ms));
-
-      // std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      // Log::get().info("Imgproc : " + std::to_string(total_time));
     }
   });
 }

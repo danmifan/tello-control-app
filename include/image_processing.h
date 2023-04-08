@@ -22,7 +22,7 @@ class ImageProcessing {
   void start();
   void setEvent(Event* event);
   unsigned char* getImage();
-  void setHoverPose();
+  void hover();
 
  private:
   unsigned char* image_ = nullptr;
@@ -36,6 +36,10 @@ class ImageProcessing {
   FaceDetection face_detection_;
 
   FileLogger file_;
+
+  bool hover_enabled_ = false;
+  cv::Vec3d hover_pose_;
+  bool first_aruco_pose_ = false;
 };
 
 #endif  // IMAGE_PROCESSING_H

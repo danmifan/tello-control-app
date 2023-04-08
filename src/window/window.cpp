@@ -4,12 +4,13 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <implot.h>
 #include <GL/gl.h>
 #include <chrono>
 #include <thread>
 
-MyWindow::MyWindow(int width, int height, int framerate)
-    : width_(width), height_(height), framerate_(framerate) {}
+MyWindow::MyWindow(int width, int height, int framerate, const char *window_name)
+    : width_(width), height_(height), framerate_(framerate), window_name_(window_name) {}
 
 void glfw_error_callback(int error, const char *description) {
   std::cout << "GLFW error : " << error << " : " << description << std::endl;
@@ -21,7 +22,7 @@ int MyWindow::init() {
     return -1;
   }
 
-  window_ = glfwCreateWindow(width_, height_, "Window", NULL, NULL);
+  window_ = glfwCreateWindow(width_, height_, window_name_, NULL, NULL);
 
   if (!window_) {
     glfwTerminate();
@@ -33,6 +34,7 @@ int MyWindow::init() {
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
+  ImPlot::CreateContext();
   ImGuiIO &io = ImGui::GetIO();
   (void)io;
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;  // Enable Docking
@@ -156,6 +158,8 @@ void MyWindow::shutdown() {
 
   glfwDestroyWindow(window_);
   glfwTerminate();
+
+  ImPlot::DestroyContext();
   ImGui::DestroyContext();
 
   glDeleteTextures(3, image_textures_);

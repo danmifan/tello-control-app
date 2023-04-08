@@ -8,7 +8,7 @@
 
 class MyWindow {
  public:
-  MyWindow(int width, int height, int framerate = 60);
+  MyWindow(int width, int height, int framerate = 60, const char* window_name = "Window");
   int init();
   void update();
   void shutdown();
@@ -26,6 +26,7 @@ class MyWindow {
   unsigned char* image_data_;
   GLuint image_textures_[3];
   int framerate_;
+  const char* window_name_;
 };
 
 #endif  // IMGUI_WINDOW_H

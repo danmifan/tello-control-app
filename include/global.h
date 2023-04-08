@@ -14,5 +14,11 @@
 extern std::map<std::string, int> thread_time_;
 extern std::deque<DroneState> status_;
 extern std::deque<cv::Mat> frames_;
+extern std::vector<int> pid_values_;
+
+extern std::vector<int> x_cmds;
+extern std::vector<int> y_cmds;
+extern std::vector<int> z_cmds;
+extern std::vector<int> yaw_cmds;
 
 #endif  // GLOBAL_H

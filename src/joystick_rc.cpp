@@ -17,10 +17,10 @@ void JoystickRc::start() {
       while (run_) {
         JoystickInputs inputs;
         bool new_event = joystick_.update(inputs);
-        if (inputs.square_up) {
+        if (inputs.cross_up) {
           enabled_ = true;
         }
-        if (inputs.triangle_up) {
+        if (inputs.circle_up) {
           enabled_ = false;
         }
         if (inputs.square_up) {
@@ -32,12 +32,13 @@ void JoystickRc::start() {
           // Log::get().info("Triangle");
         }
         if (inputs.rstick_button_up) {
-          ip_->setHoverPose();
+          ip_->hover();
         }
         if (new_event && enabled_) {
           fc_->radioControl(inputs.lx, inputs.ly, inputs.ry, inputs.rx);
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        // std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(15));
       }
     });
   }

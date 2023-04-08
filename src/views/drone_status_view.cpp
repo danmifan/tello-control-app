@@ -4,6 +4,8 @@
 
 #include "data.h"
 
+DroneStatusView::DroneStatusView(DroneStatus* drone_status) : drone_status_(drone_status) {}
+
 void DroneStatusView::update() {
   if (!status_.empty()) {
     current_state_ = status_.back();
@@ -38,6 +40,9 @@ void DroneStatusView::update() {
   ImGui::PopStyleColor(1);
   ImGui::Text("TOF : %i", current_state_.tof);
   ImGui::Text("Time : %i", current_state_.time);
+  ImGui::Text("dt : %f", current_state_.dt);
+  // ImGui::Text("Baro delta : %f", current_state_.baro - first_state.baro);
+  ImGui::Text("Baro delta : %f", current_state_.dbaro);
 
   ImGui::End();
 }

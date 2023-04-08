@@ -130,10 +130,10 @@ void FlightControl::land() {
   is_flying_ = false;
 }
 
-void FlightControl::radioControl(int a, int b, int c, int d) {
+void FlightControl::radioControl(int y, int x, int minus_z, int yaw) {
   std::string cmd = "rc ";
-  cmd += std::to_string(a) + " " + std::to_string(b) + " " + std::to_string(c) + " " +
-         std::to_string(d);
+  cmd += std::to_string(y) + " " + std::to_string(x) + " " + std::to_string(minus_z) + " " +
+         std::to_string(yaw);
   commands_.emplace_front(cmd);
 }
 
@@ -144,11 +144,6 @@ void FlightControl::customCommand(std::string command) { commands_.emplace_front
 void FlightControl::streamon() { commands_.emplace_front(std::string("streamon")); }
 
 void FlightControl::streamoff() { commands_.emplace_front(std::string("streamoff")); }
-
-void FlightControl::hover() {
-  // Emergency command have a higher priority
-  commands_.emplace_back(std::string("stop"));
-}
 
 void FlightControl::emergencyStop() {
   // Emergency command have a higher priority

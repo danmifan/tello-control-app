@@ -25,13 +25,12 @@ class FlightControl {
   void rotate(int angle);
   void takeoff();
   void land();
-  void radioControl(int x, int y, int z, int yaw);
+  void radioControl(int y, int x, int minus_z, int yaw);
   void enableSDK();
   void getBattery();
   void customCommand(std::string command);
   void streamon();
   void streamoff();
-  void hover();
   void emergencyStop();
   bool isFlying();
 
@@ -47,7 +46,6 @@ class FlightControl {
   int time_since_last_command_ = 0;
   struct timeval tv_;
   struct timeval rc_tv_;
-
   char* answer_buffer_ = nullptr;
 };
 

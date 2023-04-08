@@ -26,7 +26,9 @@ bool Tracker::track(cv::Mat frame, TrackData& target) {
       init_ = true;
     } else {
       cv_tracker_->clear();
+
       cv_tracker_ = cv::legacy::TrackerMedianFlow::create();
+
       cv_tracker_->init(frame, rect);
     }
   }

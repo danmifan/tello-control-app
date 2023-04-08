@@ -4,7 +4,8 @@
 
 char buffer[256];
 
-FlightControlView::FlightControlView(FlightControl* fc, VideoStreaming* vs) : fc_(fc), vs_(vs) {}
+FlightControlView::FlightControlView(FlightControl* fc, VideoStreaming* vs, ImageProcessing* ip)
+    : fc_(fc), vs_(vs), ip_(ip) {}
 
 void FlightControlView::update() {
   ImGui::Begin("Commands");
@@ -17,32 +18,24 @@ void FlightControlView::update() {
     fc_->takeoff();
   }
 
-  if (ImGui::Button("Landing")) {
+  ImGui::SameLine();
+
+  if (ImGui::Button("Land")) {
     fc_->land();
   }
 
-  if (ImGui::Button("Hover")) {
-    fc_->hover();
-  }
+  ImGui::SameLine();
 
   if (ImGui::Button("Emergency")) {
     fc_->emergencyStop();
   }
 
+  if (ImGui::Button("Hover")) {
+    ip_->hover();
+  }
+
   if (ImGui::Button("Battery?")) {
     fc_->getBattery();
-  }
-
-  ImGui::InputText("Custom", buffer, sizeof(buffer));
-
-  if (ImGui::Button("Validate")) {
-    std::string str(buffer);
-    fc_->customCommand(str);
-  }
-
-  if (ImGui::Button("Stream OFF")) {
-    vs_->stop();
-    fc_->streamoff();
   }
 
   if (ImGui::Button("Stream ON")) {
@@ -50,7 +43,21 @@ void FlightControlView::update() {
     fc_->streamon();
   }
 
-  // ImGui::Checkbox("Joystick", joystick_enabled_);
+  ImGui::SameLine();
+
+  if (ImGui::Button("Stream OFF")) {
+    vs_->stop();
+    fc_->streamoff();
+  }
+
+  ImGui::InputText("Custom", buffer, sizeof(buffer));
+
+  ImGui::SameLine();
+
+  if (ImGui::Button("Validate")) {
+    std::string str(buffer);
+    fc_->customCommand(str);
+  }
 
   ImGui::End();
 }

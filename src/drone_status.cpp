@@ -2,6 +2,9 @@
 
 #include <unistd.h>
 #include <iostream>
+#include <chrono>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 #include "global.h"
 #include "logger.h"
@@ -10,14 +13,12 @@ std::deque<DroneState> status_;
 
 DroneStatus::~DroneStatus() {
   close(state_socket_);
-  if (run_) {
-    run_ = false;
-    th_.join();
-  }
+  run_ = false;
+  th_.join();
 }
 
 int DroneStatus::start() {
-  run_ = true;
+  struct sockaddr_in state_addr_, source_addr_;
 
   state_socket_ = socket(AF_INET, SOCK_DGRAM, 0);
   if (state_socket_ == -1) {
@@ -43,7 +44,7 @@ int DroneStatus::start() {
 
   th_ = std::thread([&]() {
     while (run_) {
-      DroneState state;
+      auto t1 = std::chrono::high_resolution_clock::now();
 
       char state_buffer[256];
       unsigned int len = sizeof(source_addr_);
@@ -54,6 +55,8 @@ int DroneStatus::start() {
       if (size < 0) {
         // std::cout << "State reception failed" << std::endl;
       } else {
+        DroneState state;
+
         struct timeval tv;
         gettimeofday(&tv, NULL);
         state.timestamp = tv;
@@ -66,9 +69,20 @@ int DroneStatus::start() {
                &state.h, &state.bat, &state.baro, &state.time, &state.acceleration.x,
                &state.acceleration.y, &state.acceleration.z);
 
-        // std::cout << state_buffer << std::endl;
+        if (first_) {
+          first_state_ = state;
+          first_ = false;
+        } else {
+          state.dbaro = state.baro - first_state_.baro;
+        }
 
-        // states_.push_front(state);
+        auto t2 = std::chrono::high_resolution_clock::now();
+        // int duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        float duration_s =
+            std::chrono::duration_cast<std::chrono::duration<float>>(t2 - t1).count();
+
+        state.dt = duration_s;
+
         status_.push_back(state);
       }
     }

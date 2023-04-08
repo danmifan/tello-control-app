@@ -3,8 +3,6 @@
 
 #include "data.h"
 
-#include <sys/socket.h>
-#include <arpa/inet.h>
 #include <thread>
 #include <deque>
 #include <atomic>
@@ -16,10 +14,11 @@ class DroneStatus {
 
  private:
   std::deque<DroneState> states_;
-  struct sockaddr_in state_addr_, source_addr_;
   int state_socket_;
   std::thread th_;
-  std::atomic<bool> run_ = {false};
+  std::atomic<bool> run_ = {true};
+  bool first_ = true;
+  DroneState first_state_;
 };
 
 #endif  // DRONE_STATUS_H

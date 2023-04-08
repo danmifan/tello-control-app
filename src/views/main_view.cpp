@@ -1,7 +1,9 @@
 #include "views/main_view.h"
 
 #include <imgui.h>
+#include <implot.h>
 
+#include "global.h"
 #include "logger.h"
 
 MainView::MainView(int image_width, int image_height)
@@ -24,15 +26,9 @@ void MainView::showDroneVideoFeed() {
                imgproc_image_);
 
   ImGui::Begin("Images");
+
   ImGui::BeginTabBar("test");
-  if (ImGui::BeginTabItem("Video feed")) {
-    ImGui::Image((void*)(intptr_t)textures_[0], ImVec2(image_width_, image_height_));
-    ImGui::EndTabItem();
-  }
-  // if (ImGui::BeginTabItem("Face detect")) {
-  //   ImGui::Image((void*)(intptr_t)textures_[1], ImVec2(image_width_, image_height_));
-  //   ImGui::EndTabItem();
-  // }
+
   if (ImGui::BeginTabItem("ImgProc")) {
     ImGui::Image((void*)(intptr_t)textures_[2], ImVec2(image_width_, image_height_));
 
@@ -48,6 +44,16 @@ void MainView::showDroneVideoFeed() {
     }
     ImGui::EndTabItem();
   }
+
+  if (ImGui::BeginTabItem("Video feed")) {
+    ImGui::Image((void*)(intptr_t)textures_[0], ImVec2(image_width_, image_height_));
+    ImGui::EndTabItem();
+  }
+  // if (ImGui::BeginTabItem("Face detect")) {
+  //   ImGui::Image((void*)(intptr_t)textures_[1], ImVec2(image_width_, image_height_));
+  //   ImGui::EndTabItem();
+  // }
+
   ImGui::EndTabBar();
   ImGui::End();
 }
@@ -115,6 +121,7 @@ void MainView::update() {
 
   if (show_demo_) {
     ImGui::ShowDemoWindow();
+    ImPlot::ShowDemoWindow();
   }
 
   showDroneVideoFeed();
@@ -122,6 +129,28 @@ void MainView::update() {
   showConsole();
 
   showOverlay();
+
+  // ImGui::Begin("Plot");
+  // static float test[] = {0};
+  // // static float test2[] = {360.0f};
+
+  // if (ImPlot::BeginPlot("My Plot")) {
+  //   ImPlot::PlotLine("PID", pid_values_.data(), pid_values_.size());
+  //   ImPlot::PlotInfLines("Test", test, 1, ImPlotInfLinesFlags_Horizontal);
+  //   ImPlot::EndPlot();
+  // }
+  // ImGui::End();
+
+  ImGui::Begin("Plot");
+  if (ImPlot::BeginPlot("RC commands")) {
+    ImPlot::SetupAxes(NULL, "RC", 0, ImPlotAxisFlags_LockMax | ImPlotAxisFlags_LockMin);
+    ImPlot::SetupAxesLimits(0, 1000, -100, 100);
+    ImPlot::SetupAxisLimitsConstraints(ImAxis_X1, 0, 10000);
+    ImPlot::PlotLine("y_cmd", y_cmds.data(), y_cmds.size());
+    ImPlot::PlotLine("z_cmd", z_cmds.data(), z_cmds.size());
+    ImPlot::EndPlot();
+  }
+  ImGui::End();
 }
 
 void MainView::setImage(unsigned char* image) { image_ = image; }

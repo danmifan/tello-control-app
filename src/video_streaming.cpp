@@ -2,9 +2,11 @@
 
 #include <iostream>
 #include <chrono>
-#include <opencv2/cudacodec.hpp>
 
+#include "logger.h"
 #include "global.h"
+
+#include "debug_chrono.h"
 
 std::deque<cv::Mat> frames_;
 
@@ -34,8 +36,23 @@ void VideoStreaming::start() {
     return;
   }
 
+  // while (!cap_.open("udp://0.0.0.0:11111", cv::CAP_GSTREAMER) && run_) {
+
   th_ = std::thread([&]() {
-    while (!cap_.open("udp://0.0.0.0:11111", cv::CAP_GSTREAMER) && run_) {
+    // std::string pipeline =
+    //     "udpsrc port=11111 ! video/x-h264, stream-format=(string)byte-stream, width=(int)960, "
+    //     "height=(int)720, framerate=(fraction)24/1, skip-first-bytes=2 ! queue ! decodebin ! "
+    //     "videoconvert ! appsink";
+
+    // std::string pipeline =
+    //     "udpsrc port=11111 ! video/x-h264,width=960,height=720,framerate=24/1 ! h264parse "
+    //     "!avdec_h264 !videoconvert ! appsink ";
+
+    std::string pipeline =
+        "udpsrc port=11111 ! video/x-h264,width=960,height=720,framerate=24/1 ! h264parse "
+        "!avdec_h264 !queue ! videoconvert ! appsink ";
+
+    while (!cap_.open(pipeline, cv::CAP_GSTREAMER) && run_) {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
       std::cout << "Waiting for stream..." << std::endl;
     }
@@ -49,7 +66,6 @@ void VideoStreaming::start() {
 
           frames_.push_back(frame);
 
-          // does converting introduce delay ?
           cv::cvtColor(frame, cvt_frame, cv::COLOR_BGR2RGB);
 
           memcpy(image_, cvt_frame.data, 960 * 720 * 3);
@@ -64,7 +80,7 @@ void VideoStreaming::start() {
       int delta = 33 - duration_ms;
 
       if (delta > 0) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(delta));
+        // std::this_thread::sleep_for(std::chrono::milliseconds(delta));
       }
     }
     cap_.release();

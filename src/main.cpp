@@ -12,7 +12,7 @@
 #include "logger.h"
 
 int main(int /*argc*/, char** /*argv*/) {
-  MyWindow window(1600, 900);
+  MyWindow window(1600, 900, 60, "Tello control");
 
   FlightControl flight_control;
   DroneStatus drone_status;
@@ -22,8 +22,8 @@ int main(int /*argc*/, char** /*argv*/) {
 
   // Views
   MainView main_view(960, 720);
-  FlightControlView fc_view(&flight_control, &stream);
-  DroneStatusView drone_status_view;
+  FlightControlView fc_view(&flight_control, &stream, &processing);
+  DroneStatusView drone_status_view(&drone_status);
 
   flight_control.start();
   drone_status.start();

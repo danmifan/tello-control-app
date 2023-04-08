@@ -18,7 +18,8 @@ project "imgui"
   targetdir "lib/"
 
   includedirs {
-    "thirdparty/imgui"
+    "thirdparty/imgui",
+    "thirdparty/implot"
   }
 
   links {
@@ -29,6 +30,7 @@ project "imgui"
     "thirdparty/imgui/*.cpp",
     "thirdparty/imgui/backends/imgui_impl_glfw.cpp",
     "thirdparty/imgui/backends/imgui_impl_opengl3.cpp",
+    "thirdparty/implot/*.cpp"
   }
 
 
@@ -40,7 +42,8 @@ project "window"
   includedirs {
     "include",
     "thirdparty/imgui",
-    "thirdparty/imgui/backends"
+    "thirdparty/imgui/backends",
+    "thirdparty/implot"
   }
 
   libdirs {
@@ -68,12 +71,11 @@ project "tello-control-app"
   includedirs {
     "include",
     "thirdparty/imgui",
-    -- "/usr/local/include/opencv4"
+    "thirdparty/implot"
   }
 
   libdirs {
     "lib",
-    -- "/usr/local/lib"
   }
 
   links {
@@ -81,8 +83,6 @@ project "tello-control-app"
     "window",
     "pthread",
     "GL"
-    -- "opencv_core",
-    -- "opencv_videoio"
   }
 
   files {
@@ -128,34 +128,22 @@ project "tello-control-app"
 --     "src/calib/calib.cpp"
 --   }
 
--- project "aruco_gen"
---   kind "ConsoleApp"
---   language "C++"
---   targetdir "bin/"
+project "aruco_gen"
+  kind "ConsoleApp"
+  language "C++"
+  targetdir "bin/"
 
---   buildoptions { "`pkg-config --cflags opencv4`"}
---   linkoptions {"`pkg-config --libs opencv4`" }
+  buildoptions { "`pkg-config --cflags opencv4`"}
+  linkoptions {"`pkg-config --libs opencv4`" }
 
 
---   -- includedirs {
---   --   "/usr/local/include/opencv4"
---   -- }
+  -- links {
+  --   "pthread",
+  -- }
 
---   -- libdirs {
---   --   "/usr/local/lib"
---   -- }
-
---   -- links {
---   --   "pthread",
---   --   "opencv_core",
---   --   "opencv_highgui",
---   --   "opencv_videoio",
---   --   "opencv_imgproc"
---   -- }
-
---   files {
---     "src/aruco/gen.cpp"
---   }
+  files {
+    "src/aruco/gen.cpp"
+  }
 
 
 -- project "stream_test"

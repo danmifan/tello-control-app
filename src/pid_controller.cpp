@@ -15,7 +15,7 @@ float PIDController::correct(float current, float goal) {
   // Log::get().info("dt : " + std::to_string(dt));
   // Log::get().info("Duration : " + std::to_string(duration_ms));
 
-  float error = current - goal;
+  float error = goal - current;
   // Proportional
   float p = kp_ * error;
 
@@ -31,8 +31,9 @@ float PIDController::correct(float current, float goal) {
 
   previous_error_ = error;
 
-  Log::get().info("P : " + std::to_string(p) + " " + "I : " + std::to_string(i) + " " +
-                  "D : " + std::to_string(d));
+  // Log::get().info("P : " + std::to_string(p) + " " + "I : " + std::to_string(i) + " " +
+  //                 "D : " + std::to_string(d));
+  // Log::get().info(" P + I + D : " + std::to_string(pid));
 
   pid = clamp(pid, min, max);
 

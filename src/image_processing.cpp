@@ -12,10 +12,22 @@
 #include "pid_controller.h"
 
 std::map<std::string, int> thread_time_;
+std::vector<int> pid_values_;
+
+std::vector<int> x_cmds;
+std::vector<int> y_cmds;
+std::vector<int> z_cmds;
+std::vector<int> yaw_cmds;
 
 ImageProcessing::ImageProcessing(FlightControl* fc) {
   fc_ = fc;
   image_ = (unsigned char*)malloc(960 * 720 * 3);
+
+  pid_values_.reserve(10000);
+  x_cmds.reserve(10000);
+  y_cmds.reserve(10000);
+  z_cmds.reserve(10000);
+  yaw_cmds.reserve(10000);
 }
 
 ImageProcessing::~ImageProcessing() {
@@ -29,8 +41,10 @@ void ImageProcessing::start() {
   run_ = true;
 
   th_ = std::thread([&]() {
-    PIDController z_pid(0.7, 0.0001, 0.1);
-    PIDController yaw_pid(0.7, 0.0001, 0.1);
+    // PIDController z_pid(0.7, 0.0001, 0.1);
+    PIDController z_pid(1, 0, 0);
+    PIDController yaw_pid(0.5, 0, 0);
+    PIDController y_pid(1, 0, 0);
 
     while (run_) {
       auto t1 = std::chrono::high_resolution_clock::now();
@@ -42,19 +56,47 @@ void ImageProcessing::start() {
         // face_detection_.detect(frame);
 
         // Aruco
-        // aruco_detector_.detect(frame);
+        cv::Vec3d mvt = {0, 0, 0};
+        if (aruco_detector_.detect(frame, mvt)) {
+          if (hover_enabled_) {
+            cv::putText(frame, "Hover", cv::Point2i(0, 600), cv::FONT_HERSHEY_PLAIN, 2,
+                        cv::Scalar(255, 255, 255, 255));
+
+            std::stringstream ss;
+            ss << hover_pose_;
+
+            cv::putText(frame, ss.str(), cv::Point2i(0, 650), cv::FONT_HERSHEY_PLAIN, 2,
+                        cv::Scalar(255, 255, 255, 255));
+
+            std::stringstream ss2;
+            ss2 << mvt;
+            cv::putText(frame, ss2.str(), cv::Point2i(0, 700), cv::FONT_HERSHEY_PLAIN, 2,
+                        cv::Scalar(255, 255, 255, 255));
+
+            if (!first_aruco_pose_) {
+              hover_pose_ = mvt;
+              first_aruco_pose_ = true;
+            }
+            float y_cmd = -y_pid.correct(mvt[1], hover_pose_[1]);
+            float z_cmd = -z_pid.correct(mvt[2], hover_pose_[2]);
+
+            y_cmds.push_back(y_cmd);
+            z_cmds.push_back(z_cmd);
+
+            // Log::get().info("PID : " + std::to_string(y_cmd) + " " + std::to_string(z_cmd));
+
+            fc_->radioControl(y_cmd, 0, -z_cmd, 0);
+          }
+        }
 
         // Track
         TrackData target;
         if (tracker_.track(frame, target)) {
           // Correct
+          int z_cmd = z_pid.correct(720 / 2, target.position.y);
+          int yaw_cmd = yaw_pid.correct(960 / 2, target.position.x);
 
-#warning Sortir PID de la condition
-          float z_cmd = z_pid.correct(720 / 2, target.position.y);
-          float yaw_cmd = yaw_pid.correct(960 / 2, target.position.x);
-
-          int z_cmd_i = z_cmd;
-          int yaw_cmd_i = yaw_cmd;
+          pid_values_.push_back(yaw_cmd);
 
           Log::get().info("PID : " + std::to_string(z_cmd) + " " + std::to_string(yaw_cmd));
 
@@ -97,4 +139,9 @@ void ImageProcessing::setEvent(Event* event) { tracker_.setEvent(event); }
 
 unsigned char* ImageProcessing::getImage() { return image_; }
 
-void ImageProcessing::setHoverPose() {}
+void ImageProcessing::hover() {
+  hover_enabled_ = !hover_enabled_;
+  if (hover_enabled_) {
+    first_aruco_pose_ = false;
+  }
+}

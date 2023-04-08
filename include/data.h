@@ -41,9 +41,11 @@ struct DroneState {
   int h = 0;
   int bat = 0;
   float baro = 0.0f;
+  float dbaro = 0.0f;
   int time = 0;
   Vec3f acceleration;
   struct timeval timestamp;
+  float dt = 0.0;
 };
 
 #endif  // DATA_H

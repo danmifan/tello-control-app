@@ -2,9 +2,26 @@
 
 ## Overview
 
-This C++ project is about trying to see how we can add more functionalities (navigation, autonomous flight, stabilization...) to a DJI Tello drone, a ~100€ drone equipped with a fixed forward-facing camera and a downward facing infrared sensor.
+The DJI Tello Drone is ~100€ drone equipped with a fixed forward-facing camera and a downward facing infrared sensor.
+
+This repository is a C++ project where we try to see how we can add more functionalities (navigation, autonomous flight, stabilization...) to the drone.
+
+You can find in this repository a : 
+- C++ application with a GUI that enables you to send commands to the drone, receive the drone state data, decode the drone video stream, and enable face/object tracking.
+- Trajectory visualizer (soon...)
+
+This is also a summary of all the research I've done on the drone and its hardware to understand how it works and how I can improve it.
 
 ## Table of contents
+- [Introduction](#introduction)
+- [Goals](#goals)
+- [Features](#features)
+- [DJI Tello SDK details](#dji-tello-sdk)
+  - [Commands](#commands)
+  - [Drone state](#drone-state)
+  - [Video streaming](#video-streaming)
+- [Upgrades](#upgrades)
+- [Getting started](#getting-started)
 
 ## Introduction
 
@@ -16,13 +33,23 @@ The drone will also send a data string on your local 8890 port, containing vario
 
 When the "streamon" command is sent, you can retrieve a video stream on port 11111.
 
-This is pretty much all you have to interact with the drone.
+This SDK is pretty much all you have to interact with the drone. 
+
+[SDK Details](#dji-tello-sdk)
+
+The point of this project is to try to use vision based algorithm to enhance the capabilities of the drone. We will create control loops where we : 
+- will receive an image from the drone
+- search for faces or objects for example
+- find how far we drifted from the target
+- send a correction to the drone
+- repeat
 
 
 ## Goals
 
 - Control the drone using a GUI, a gamepad or keyboard
-- Indoor navigation between defined waypoints
+- Achieve indoor navigation between defined waypoints
+- Achieve tracking of objects or people
 - 3D visualization of the drone trajectory and attitudes, maybe even of the mapped environment obtained by visual SLAM ?
 
 ## Features 
@@ -44,11 +71,7 @@ This is pretty much all you have to interact with the drone.
 - [ ] Following target
 - [ ] Circling around target ?
 
-
-
-
 ## DJI Tello SDK
-
 
 ### Commands
 
@@ -94,10 +117,22 @@ Data string received :
 | bat | drone battery         | % |
 | time | amount of time since motor start         | seconds |
 
+### Video streaming
 
-## Limitations
+Once the "streamon" command is sent, you can receive a x264 video streaming from the drone on your local 11111 port.
+
+You can easily decode it with opencv, we used  a gstreamer pipeline in this project.
+
+## Upgrades
+
+There is a way to mod and improve the hardware of the drone without doing any soldering on the tello battery. By plugging a USB OTG adapter on the USB port of the drone, you can power small devices such as a Arduino nano. This enables you to power and control additional hardware such as sensors, LEDs...
 
 ## Getting started
 
-### Prerequisites
+### Dependencies
+
+- ImGui
+- OpenCV
+- Eigen
+
 

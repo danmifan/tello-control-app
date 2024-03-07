@@ -4,7 +4,7 @@
 
 ## Overview
 
-The DJI Tello Drone is ~100€ drone equipped with a fixed forward-facing camera and a downward facing infrared sensor.
+The DJI Tello Drone is a ~100€ drone equipped with a fixed forward-facing camera and a downward facing infrared sensor. It is not programmable directly but it can receive pre-defined commands by sending specific strings over UDP.
 
 This repository is a C++ project where we try to see how we can add more functionalities (navigation, autonomous flight, stabilization...) to the drone.
 
@@ -46,7 +46,6 @@ The point of this project is to try to use vision based algorithm to enhance the
 - send a correction to the drone
 - repeat
 
-
 ## Goals
 
 - Control the drone using a GUI, a gamepad or keyboard
@@ -59,6 +58,7 @@ The point of this project is to try to use vision based algorithm to enhance the
 +++
 
 - [x] Drone manual control with GUI and getting drone data back
+- [x] Drone RC control with a gamepad
 - [x] Drone video stream decoding
 - [x] Face detection and tracking
 - [x] Aruco marker detection
@@ -115,7 +115,7 @@ Data string received :
 | temph  | highest temperature             | °C |
 | tof  | time of flight : current drone distance to ground            | cm |
 | h  | height above drone starting point         | cm |
-| baro  | barometer measurement         | cm |
+| baro  | barometer measurement         | m |
 | bat | drone battery         | % |
 | time | amount of time since motor start         | seconds |
 

@@ -8,6 +8,17 @@ This C++ project is about trying to see how we can add more functionalities (nav
 
 ## Introduction
 
+![tello diagram](doc/tello2.jpg)
+
+When powered on, the drone creates a WiFi hostpost (Tello - XXXX), connecting to this WiFi and sending the string "command" via UDP to 192.168.10.1:8889 will enable the SDK mode. In this mode, the drone can be controlled by sending command strings to this port.
+
+The drone will also send a data string on your local 8890 port, containing various data such as remaining battery, drone attitude...
+
+When the "streamon" command is sent, you can retrieve a video stream on port 11111.
+
+This is pretty much all you have to interact with the drone.
+
+
 ## Goals
 
 - Control the drone using a GUI, a gamepad or keyboard
@@ -16,18 +27,34 @@ This C++ project is about trying to see how we can add more functionalities (nav
 
 ## Features 
 
++++
+
 - [x] Drone manual control with GUI and getting drone data back
 - [x] Drone video stream decoding
 - [x] Face detection and tracking
 - [x] Aruco marker detection
+- [ ] Use aruco (or other) to hover
+- [ ] Collision avoidance
 - [ ] Use a visual SLAM for navigations
+
+++
+
+- [ ] Control with hand gestures ?
+- [ ] Object detection ?
+- [ ] Following target
+- [ ] Circling around target ?
+
+
+
 
 ## DJI Tello SDK
 
 
 ### Commands
 
-All the move and rotate commands (up,down,left,right,forward,cw...) are way too slow, the drone is unresponsive and cannot receive anymore command until the movement has been completed. The RC commands on the other hand are fast to execute and the drone can receive new commands (one every ~10ms), this is why we're only using RC commands to control the drone in this program.
+All the move and rotate commands (up,down,left,right,forward,cw...) are way too slow, the drone is unresponsive and cannot receive anymore command until the movement has been completed. Even if the action has been completed, you need to wait 100ms between every command you send otherwise the drone will ignore it. 
+
+The RC commands on the other hand are fast to execute and the drone can receive new commands (one every ~10ms), this is why we're only using RC commands to control the drone in this program.
 
 | Name | Description |
 |------|-------------|
@@ -42,7 +69,7 @@ All the move and rotate commands (up,down,left,right,forward,cw...) are way too 
 | flip x | Flips in x direction, x = "l"=left, "r", "f", "b" |
 | go x y z speed | Fly to x y z at speed (cm/s) x,y,z = -500-500, speed = 10-200 |
 | stop  | Hovers |
-| curve x1 y1 z1 x2 y2 z2 speed | Fly at a curve... |
+| curve x1 y1 z1 x2 y2 z2 speed | Fly at a curve ?? |
 | speed x  | Set speed to x cm/s, x=10-100 ?? |
 | rc a b c d  | Remote controller control : a = left/right (-100-100), b = forward/backward(-100-100), c = up/down(-100-100), d = yaw(-100,100) |
 

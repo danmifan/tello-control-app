@@ -1,5 +1,7 @@
 # Autonomous navigation for DJI Tello
 
+![GUI Screenshot](doc/gui.jpg)
+
 ## Overview
 
 The DJI Tello Drone is ~100€ drone equipped with a fixed forward-facing camera and a downward facing infrared sensor.
@@ -126,6 +128,8 @@ You can easily decode it with opencv, we used  a gstreamer pipeline in this proj
 ## Upgrades
 
 There is a way to mod and improve the hardware of the drone without doing any soldering on the tello battery. By plugging a USB OTG adapter on the USB port of the drone, you can power small devices such as a Arduino nano. This enables you to power and control additional hardware such as sensors, LEDs...
+
+It might be possible for example to add an arduino nano on the drone and an ultrasonic range finder in order to implement obstacle avoidance.
 
 ## Getting started
 

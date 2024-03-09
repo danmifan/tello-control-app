@@ -50,6 +50,9 @@ int FlightControl::start() {
     customCommand(str);
   });
 
+  grc_event_dispatcher.appendListener(0, [&](const RCEvent& e) {
+    radioControl(e.y, e.x, e.minus_z, e.yaw);
+  });
 
   cmd_socket_ = socket(AF_INET, SOCK_DGRAM, 0);
   if (cmd_socket_ == -1) {

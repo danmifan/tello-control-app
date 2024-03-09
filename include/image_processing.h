@@ -8,7 +8,6 @@
 #include <opencv2/core.hpp>
 
 #include "face_detection.h"
-#include "flight_control.h"
 #include "tracker.h"
 #include "aruco_detector.h"
 #include "file_logger.h"
@@ -17,23 +16,22 @@
 
 class ImageProcessing {
  public:
-  ImageProcessing(FlightControl* fc);
+  ImageProcessing(int width, int height, int channels);
   ~ImageProcessing();
   void start();
   void setEvent(Event* event);
   unsigned char* getImage();
   void hover();
 
-  void enableArucoDetector(bool enable);
-  void enableFaceDetector(bool enable);
-
  private:
   unsigned char* image_ = nullptr;
   std::thread th_;
   std::atomic<bool> run_ = {false};
-  FlightControl* fc_;
 
   // CV
+  int width_;
+  int height_;
+  int channels_;
   Tracker tracker_;
   ArucoDetector aruco_detector_;
   FaceDetection face_detection_;

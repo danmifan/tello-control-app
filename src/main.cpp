@@ -17,13 +17,14 @@
 
 
 int main(int /*argc*/, char** /*argv*/) {
+  #warning Add width/height to json config file
   MyWindow window(1600, 900, 60, "Tello control");
 
   FlightControl flight_control;
   DroneStatus drone_status;
   VideoStreaming stream(960, 720, 3);
-  ImageProcessing processing(&flight_control);
-  JoystickRc joystick_rc(&flight_control);
+  ImageProcessing processing(960, 720, 3);
+  JoystickRc joystick_rc;
 
   // Views
   MainView main_view(960, 720);
@@ -62,7 +63,7 @@ int main(int /*argc*/, char** /*argv*/) {
 
   window.shutdown();
 
-  std::cout << "Bye" << std::endl;
+  std::cout << "Bye !" << std::endl;
 
   return 0;
 }

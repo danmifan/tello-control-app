@@ -19,15 +19,18 @@ std::vector<int> y_cmds;
 std::vector<int> z_cmds;
 std::vector<int> yaw_cmds;
 
-ImageProcessing::ImageProcessing(FlightControl* fc) {
-  fc_ = fc;
-  image_ = (unsigned char*)malloc(960 * 720 * 3);
+ImageProcessing::ImageProcessing(int width, int height, int channels) {
+  image_ = (unsigned char*)malloc(width * height * channels);
 
   pid_values_.reserve(10000);
   x_cmds.reserve(10000);
   y_cmds.reserve(10000);
   z_cmds.reserve(10000);
   yaw_cmds.reserve(10000);
+
+  width_ = width;
+  height_ = height;
+  channels_ = channels;
 }
 
 ImageProcessing::~ImageProcessing() {
@@ -104,7 +107,8 @@ void ImageProcessing::start() {
 
               // Log::get().info("PID : " + std::to_string(y_cmd) + " " + std::to_string(z_cmd));
 
-              fc_->radioControl(y_cmd, 0, -z_cmd, 0);
+              grc_event_dispatcher.dispatch(0, {(int)y_cmd, 0, (int)-z_cmd, 0});
+              // fc_->radioControl(y_cmd, 0, -z_cmd, 0);
             }
           }
         }
@@ -113,8 +117,8 @@ void ImageProcessing::start() {
         TrackData target;
         if (tracker_.track(frame, target)) {
           // Correct
-          int z_cmd = z_pid.correct(720 / 2, target.position.y);
-          int yaw_cmd = yaw_pid.correct(960 / 2, target.position.x);
+          int z_cmd = z_pid.correct(height_ / 2.0f, target.position.y);
+          int yaw_cmd = yaw_pid.correct(width_ / 2.0f, target.position.x);
 
           pid_values_.push_back(yaw_cmd);
 
@@ -133,7 +137,7 @@ void ImageProcessing::start() {
 
         cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
 
-        memcpy(image_, frame.data, 960 * 720 * 3);
+        memcpy(image_, frame.data, width_ * height_ * channels_);
       }
 
       auto t2 = std::chrono::high_resolution_clock::now();
@@ -165,7 +169,3 @@ void ImageProcessing::hover() {
     first_aruco_pose_ = false;
   }
 }
-
-void ImageProcessing::enableArucoDetector(bool enable) { aruco_detector_enabled_ = enable; }
-
-void ImageProcessing::enableFaceDetector(bool enable) { face_detector_enabled_ = enable; }

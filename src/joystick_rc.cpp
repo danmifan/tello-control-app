@@ -2,7 +2,7 @@
 
 #include "global.h"
 #include "logger.h"
-JoystickRc::JoystickRc(FlightControl* fc) : fc_(fc) {}
+JoystickRc::JoystickRc() {}
 
 JoystickRc::~JoystickRc() {
   if (run_) {
@@ -25,22 +25,21 @@ void JoystickRc::start() {
         }
         if (inputs.circle_up) {
           Log::get().info("Circle");
-          fc_->emergencyStop();
+          gbutton_event_dispatcher.dispatch("Emergency");
         }
         if (inputs.square_up) {
           Log::get().info("Square");
-          fc_->takeoff();
+          gbutton_event_dispatcher.dispatch("Takeoff");
         }
         if (inputs.triangle_up) {
-          fc_->land();
           Log::get().info("Triangle");
+          gbutton_event_dispatcher.dispatch("Land");
         }
         if (inputs.rstick_button_up) {
           gbutton_event_dispatcher.dispatch("IP_Hover");
         }
         if (new_event && enabled_) {
-          Log::get().info("RC command");
-          fc_->radioControl(inputs.lx, inputs.ly, inputs.ry, inputs.rx);
+          grc_event_dispatcher.dispatch(0, {inputs.lx, inputs.ly, inputs.ry, inputs.rx});
         }
         // std::this_thread::sleep_for(std::chrono::milliseconds(10));
         std::this_thread::sleep_for(std::chrono::milliseconds(15));

@@ -8,10 +8,6 @@
 
 #include <eventpp/eventdispatcher.h>
 
-#warning Add to json config file
-#define VIDEO_WIDTH 960
-#define VIDEO_HEIGHT 720
-
 struct ArucoMarker {
   int id;
   cv::Vec3f euler;
@@ -39,6 +35,13 @@ struct DemoEvent : AEvent {
   }
 };
 
+struct RCEvent {
+  int y;
+  int x;
+  int minus_z;
+  int yaw;
+};
+
 // struct ButtonEventPolicy {
 //   static int getEvent(const ButtonEvent& e) {
 //     // return e.type;
@@ -49,6 +52,7 @@ struct DemoEvent : AEvent {
 // extern eventpp::EventDispatcher<std::string, void(const ButtonEvent&),ButtonEventPolicy> gevent_dispatcher;
 extern eventpp::EventDispatcher<std::string, void()> gbutton_event_dispatcher;
 extern eventpp::EventDispatcher<std::string, void(const std::string&)> gbutton_input_event_dispatcher;
+extern eventpp::EventDispatcher<int, void(const RCEvent& event)> grc_event_dispatcher;
 
 
 #warning wip

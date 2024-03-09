@@ -5,11 +5,10 @@
 #include <atomic>
 
 #include "joystick.h"
-#include "flight_control.h"
 
 class JoystickRc {
  public:
-  JoystickRc(FlightControl* fc);
+  JoystickRc();
   ~JoystickRc();
   void start();
 
@@ -17,7 +16,6 @@ class JoystickRc {
   Joystick joystick_;
   std::thread th_;
   std::atomic<bool> run_ = {false};
-  FlightControl* fc_;
   bool enabled_ = false;
 };
 

@@ -40,6 +40,22 @@ ImageProcessing::~ImageProcessing() {
 void ImageProcessing::start() {
   run_ = true;
 
+  gbutton_event_dispatcher.appendListener("IP_Hover", [&]() {
+    hover();
+    Log::get().info("Hover activated");
+  });
+
+   gbutton_event_dispatcher.appendListener("ArucoDetector", [&]() {
+    Log::get().info("Aruco detector");
+    aruco_detector_enabled_ = !aruco_detector_enabled_;
+  });
+
+   gbutton_event_dispatcher.appendListener("FaceDetector", [&]() {
+    Log::get().info("Face detector");
+    face_detector_enabled_ = !face_detector_enabled_;
+  });
+
+
   th_ = std::thread([&]() {
     // PIDController z_pid(0.7, 0.0001, 0.1);
     PIDController z_pid(1, 0, 0);
@@ -53,39 +69,43 @@ void ImageProcessing::start() {
         frames_.pop_back();
 
         // Face detection
-        // face_detection_.detect(frame);
+        if (face_detector_enabled_) {
+          face_detection_.detect(frame);
+        }
 
         // Aruco
-        cv::Vec3d mvt = {0, 0, 0};
-        if (aruco_detector_.detect(frame, mvt)) {
-          if (hover_enabled_) {
-            cv::putText(frame, "Hover", cv::Point2i(0, 600), cv::FONT_HERSHEY_PLAIN, 2,
-                        cv::Scalar(255, 255, 255, 255));
+        if (aruco_detector_enabled_) {
+          cv::Vec3d mvt = {0, 0, 0};
+          if (aruco_detector_.detect(frame, mvt)) {
+            if (hover_enabled_) {
+              cv::putText(frame, "Hover", cv::Point2i(0, 600), cv::FONT_HERSHEY_PLAIN, 2,
+                          cv::Scalar(255, 255, 255, 255));
 
-            std::stringstream ss;
-            ss << hover_pose_;
+              std::stringstream ss;
+              ss << hover_pose_;
 
-            cv::putText(frame, ss.str(), cv::Point2i(0, 650), cv::FONT_HERSHEY_PLAIN, 2,
-                        cv::Scalar(255, 255, 255, 255));
+              cv::putText(frame, ss.str(), cv::Point2i(0, 650), cv::FONT_HERSHEY_PLAIN, 2,
+                          cv::Scalar(255, 255, 255, 255));
 
-            std::stringstream ss2;
-            ss2 << mvt;
-            cv::putText(frame, ss2.str(), cv::Point2i(0, 700), cv::FONT_HERSHEY_PLAIN, 2,
-                        cv::Scalar(255, 255, 255, 255));
+              std::stringstream ss2;
+              ss2 << mvt;
+              cv::putText(frame, ss2.str(), cv::Point2i(0, 700), cv::FONT_HERSHEY_PLAIN, 2,
+                          cv::Scalar(255, 255, 255, 255));
 
-            if (!first_aruco_pose_) {
-              hover_pose_ = mvt;
-              first_aruco_pose_ = true;
+              if (!first_aruco_pose_) {
+                hover_pose_ = mvt;
+                first_aruco_pose_ = true;
+              }
+              float y_cmd = -y_pid.correct(mvt[1], hover_pose_[1]);
+              float z_cmd = -z_pid.correct(mvt[2], hover_pose_[2]);
+
+              y_cmds.push_back(y_cmd);
+              z_cmds.push_back(z_cmd);
+
+              // Log::get().info("PID : " + std::to_string(y_cmd) + " " + std::to_string(z_cmd));
+
+              fc_->radioControl(y_cmd, 0, -z_cmd, 0);
             }
-            float y_cmd = -y_pid.correct(mvt[1], hover_pose_[1]);
-            float z_cmd = -z_pid.correct(mvt[2], hover_pose_[2]);
-
-            y_cmds.push_back(y_cmd);
-            z_cmds.push_back(z_cmd);
-
-            // Log::get().info("PID : " + std::to_string(y_cmd) + " " + std::to_string(z_cmd));
-
-            fc_->radioControl(y_cmd, 0, -z_cmd, 0);
           }
         }
 
@@ -145,3 +165,7 @@ void ImageProcessing::hover() {
     first_aruco_pose_ = false;
   }
 }
+
+void ImageProcessing::enableArucoDetector(bool enable) { aruco_detector_enabled_ = enable; }
+
+void ImageProcessing::enableFaceDetector(bool enable) { face_detector_enabled_ = enable; }

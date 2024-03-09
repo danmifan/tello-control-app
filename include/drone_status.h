@@ -19,6 +19,10 @@ class DroneStatus {
   std::atomic<bool> run_ = {true};
   bool first_ = true;
   DroneState first_state_;
+
+  int key_;
+  int shmid_;
+  void* shm_addr_;
 };
 
 #endif  // DRONE_STATUS_H

@@ -24,6 +24,9 @@ class ImageProcessing {
   unsigned char* getImage();
   void hover();
 
+  void enableArucoDetector(bool enable);
+  void enableFaceDetector(bool enable);
+
  private:
   unsigned char* image_ = nullptr;
   std::thread th_;
@@ -40,6 +43,9 @@ class ImageProcessing {
   bool hover_enabled_ = false;
   cv::Vec3d hover_pose_;
   bool first_aruco_pose_ = false;
+
+  bool aruco_detector_enabled_;
+  bool face_detector_enabled_;
 };
 
 #endif  // IMAGE_PROCESSING_H

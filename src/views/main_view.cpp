@@ -130,6 +130,34 @@ void MainView::update() {
 
   showOverlay();
 
+  std::string aruco_button_string;
+  if (aruco_detector_enabled_) {
+    aruco_button_string = "Disable";
+  } else {
+    aruco_button_string = "Enable";
+  }
+
+  ImGui::Begin("Aruco detector");
+  if (ImGui::Button(aruco_button_string.c_str())) {
+    aruco_detector_enabled_ = !aruco_detector_enabled_;
+    gbutton_event_dispatcher.dispatch("ArucoDetector");
+  }
+  ImGui::End();
+
+  std::string face_button_string;
+  if (face_detector_enabled_) {
+    face_button_string = "Disable";
+  } else {
+    face_button_string = "Enable";
+  }
+
+  ImGui::Begin("Face detector");
+  if (ImGui::Button(face_button_string.c_str())) {
+    face_detector_enabled_ = !face_detector_enabled_;
+    gbutton_event_dispatcher.dispatch("FaceDetector");
+  }
+  ImGui::End();
+
   // ImGui::Begin("Plot");
   // static float test[] = {0};
   // // static float test2[] = {360.0f};

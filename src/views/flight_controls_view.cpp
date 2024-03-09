@@ -2,52 +2,51 @@
 
 #include <imgui.h>
 
+#include "global.h"
+
 char buffer[256];
 
-FlightControlView::FlightControlView(FlightControl* fc, VideoStreaming* vs, ImageProcessing* ip)
-    : fc_(fc), vs_(vs), ip_(ip) {}
+FlightControlView::FlightControlView() {}
 
 void FlightControlView::update() {
   ImGui::Begin("Commands");
 
   if (ImGui::Button("EnableSDK")) {
-    fc_->enableSDK();
+    gbutton_event_dispatcher.dispatch("EnableSDK");
   }
 
   if (ImGui::Button("Takeoff")) {
-    fc_->takeoff();
+    gbutton_event_dispatcher.dispatch("Takeoff");
   }
 
   ImGui::SameLine();
 
   if (ImGui::Button("Land")) {
-    fc_->land();
+    gbutton_event_dispatcher.dispatch("Land");
   }
 
   ImGui::SameLine();
 
   if (ImGui::Button("Emergency")) {
-    fc_->emergencyStop();
+    gbutton_event_dispatcher.dispatch("Emergency");
   }
 
   if (ImGui::Button("Hover")) {
-    ip_->hover();
+    gbutton_event_dispatcher.dispatch("IP_Hover");
   }
 
   if (ImGui::Button("Battery?")) {
-    fc_->getBattery();
+    gbutton_event_dispatcher.dispatch("Battery");
   }
 
   if (ImGui::Button("Stream ON")) {
-    vs_->start();
-    fc_->streamon();
+    gbutton_event_dispatcher.dispatch("Streamon");
   }
 
   ImGui::SameLine();
 
   if (ImGui::Button("Stream OFF")) {
-    vs_->stop();
-    fc_->streamoff();
+    gbutton_event_dispatcher.dispatch("Streamoff");
   }
 
   ImGui::InputText("Custom", buffer, sizeof(buffer));
@@ -56,7 +55,7 @@ void FlightControlView::update() {
 
   if (ImGui::Button("Validate")) {
     std::string str(buffer);
-    fc_->customCommand(str);
+    gbutton_input_event_dispatcher.dispatch("CustomCommand", str);
   }
 
   ImGui::End();

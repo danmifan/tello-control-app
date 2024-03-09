@@ -71,18 +71,26 @@ project "tello-control-app"
   includedirs {
     "include",
     "thirdparty/imgui",
-    "thirdparty/implot"
+    "thirdparty/implot",
+    "/usr/include/eigen3",
+    "/home/vincent/workspace/ORB_SLAM3",
+    "/home/vincent/workspace/ORB_SLAM3/Thirdparty/Sophus",
+    "/home/vincent/workspace/ORB_SLAM3/include",
+    "/home/vincent/workspace/ORB_SLAM3/include/CameraModels",
   }
 
   libdirs {
     "lib",
+    "/home/vincent/workspace/ORB_SLAM3/lib"
   }
 
   links {
     "imgui",
     "window",
     "pthread",
-    "GL"
+    "GL",
+    "ORB_SLAM3",
+    "pangolin"
   }
 
   files {
@@ -98,6 +106,35 @@ project "tello-control-app"
 --   files {
 --     "src/cli/cli.cpp"
 --   }
+
+project "tello-control-app-cli"
+  kind "ConsoleApp"
+  language "C++"
+  targetdir "bin/"
+
+  buildoptions { "`pkg-config --cflags opencv4`"}
+  linkoptions {"`pkg-config --libs opencv4`" }
+
+  includedirs {
+    "include",
+  }
+
+  files {
+    "src/aruco_detector.cpp",
+    "src/drone_status.cpp",
+    "src/face_detection.cpp",
+    "src/file_logger.cpp",
+    "src/flight_control.cpp",
+    "src/image_processing.cpp",
+    "src/joystick_rc.cpp",
+    "src/joystick.cpp",
+    "src/logger.cpp",
+    "src/pid_controller.cpp",
+    "src/tracker.cpp",
+    "src/video_streaming.cpp",
+    "src/cli/tello_control_app_cli.cpp",
+    "src/global.cpp"
+  }
 
 -- project "calib"
 --   kind "ConsoleApp"

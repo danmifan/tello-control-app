@@ -2,6 +2,7 @@
 #define JOYSTICK_H
 
 #include <map>
+#include <string>
 
 #define MAX_VALUE 32767
 #define DEAD_ZONE 9600

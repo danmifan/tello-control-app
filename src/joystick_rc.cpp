@@ -1,7 +1,8 @@
 #include "joystick_rc.h"
 
+#include "global.h"
 #include "logger.h"
-JoystickRc::JoystickRc(FlightControl* fc, ImageProcessing* ip) : fc_(fc), ip_(ip) {}
+JoystickRc::JoystickRc(FlightControl* fc) : fc_(fc) {}
 
 JoystickRc::~JoystickRc() {
   if (run_) {
@@ -17,24 +18,28 @@ void JoystickRc::start() {
       while (run_) {
         JoystickInputs inputs;
         bool new_event = joystick_.update(inputs);
+
         if (inputs.cross_up) {
-          enabled_ = true;
+          Log::get().info("Cross");
+          enabled_ = !enabled_;
         }
         if (inputs.circle_up) {
-          enabled_ = false;
+          Log::get().info("Circle");
+          fc_->emergencyStop();
         }
         if (inputs.square_up) {
-          // Log::get().info("Square");
+          Log::get().info("Square");
           fc_->takeoff();
         }
         if (inputs.triangle_up) {
           fc_->land();
-          // Log::get().info("Triangle");
+          Log::get().info("Triangle");
         }
         if (inputs.rstick_button_up) {
-          ip_->hover();
+          gbutton_event_dispatcher.dispatch("IP_Hover");
         }
         if (new_event && enabled_) {
+          Log::get().info("RC command");
           fc_->radioControl(inputs.lx, inputs.ly, inputs.ry, inputs.rx);
         }
         // std::this_thread::sleep_for(std::chrono::milliseconds(10));

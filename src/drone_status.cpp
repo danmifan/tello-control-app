@@ -6,6 +6,10 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+// shm
+#include <sys/ipc.h>
+#include <sys/shm.h>
+
 #include "global.h"
 #include "logger.h"
 
@@ -41,6 +45,13 @@ int DroneStatus::start() {
     Log::get().warning("STATE socket bind failed");
     return -1;
   }
+
+  // Creating shm
+  key_ = ftok("/tmp", 'R');
+  Log::get().info(std::to_string(key_));
+  shmid_ = shmget(key_, sizeof(DroneState), 0644 | IPC_CREAT);
+  Log::get().info(std::to_string(shmid_));
+  shm_addr_ = shmat(shmid_, NULL, 0);
 
   th_ = std::thread([&]() {
     while (run_) {
@@ -84,6 +95,23 @@ int DroneStatus::start() {
         state.dt = duration_s;
 
         status_.push_back(state);
+
+        float aX = state.acceleration.y;
+        float aY = state.acceleration.x;
+        float aZ = -state.acceleration.z;
+
+        float pitch = atan2(aY, aZ) * 57.3;
+        float roll = atan2((-aX), sqrt(aY * aY + aZ * aZ)) * 57.3;
+
+        std::cout << "Roll pitch " << roll << " " << pitch << std::endl;
+
+        std::cout << state.attitude.x << " " << state.attitude.y << std::endl;
+
+        // state.acceleration.x = roll;
+        // state.acceleration.y = pitch;
+
+        // Writing data to shm
+        memcpy(shm_addr_, &state, sizeof(DroneState));
       }
     }
   });

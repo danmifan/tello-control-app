@@ -4,6 +4,7 @@
 #include "data.h"
 #include "window/aview.h"
 #include <GL/gl.h>
+#include "image_processing.h"
 
 #include "global.h"
 
@@ -27,6 +28,8 @@ class MainView : public AView {
   int image_height_;
   bool show_demo_ = false;
   Event* event_;
+  bool aruco_detector_enabled_ = false;
+  bool face_detector_enabled_ = false;
 };
 
 #endif  // MAIN_VIEW_H

@@ -5,6 +5,8 @@
 #include <iostream>
 #include "logger.h"
 
+#include "global.h"
+
 FlightControl::~FlightControl() {
   run_ = false;
   th_.join();
@@ -15,6 +17,40 @@ FlightControl::~FlightControl() {
 }
 
 int FlightControl::start() {
+  // Connecting events
+  gbutton_event_dispatcher.appendListener("EnableSDK", [&]() {
+    enableSDK();
+  });
+
+  gbutton_event_dispatcher.appendListener("Takeoff", [&]() {
+    takeoff();
+  });
+  
+   gbutton_event_dispatcher.appendListener("Land", [&]() {
+    land();
+  });
+  
+  gbutton_event_dispatcher.appendListener("Emergency", [&]() {
+    emergencyStop();
+  });
+
+  gbutton_event_dispatcher.appendListener("Battery", [&]() {
+    getBattery();
+  });
+
+  gbutton_event_dispatcher.appendListener("Streamon", [&]() {
+    streamon();
+  });
+
+  gbutton_event_dispatcher.appendListener("Streamoff", [&]() {
+    streamoff();
+  });
+
+  gbutton_input_event_dispatcher.appendListener("CustomCommand", [&](const std::string& str) {
+    customCommand(str);
+  });
+
+
   cmd_socket_ = socket(AF_INET, SOCK_DGRAM, 0);
   if (cmd_socket_ == -1) {
     Log::get().warning("Error, could not initialize CMD socket");

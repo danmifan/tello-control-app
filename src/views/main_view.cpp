@@ -2,13 +2,19 @@
 
 #include <imgui.h>
 #include <implot.h>
+#include <sstream>
+
+#include "event.h"
+#include "logger.h"
 
 #include "global.h"
-#include "logger.h"
 
 MainView::MainView(int image_width, int image_height)
     : image_width_(image_width), image_height_(image_height) {
-  event_ = new Event;
+  gevent_dispatcher.appendListener(
+      "ArucoDetectorStatus",
+      eventpp::argumentAdapter<void(const ArucoDetectorStatusEvent&)>(
+          [&](const ArucoDetectorStatusEvent& e) { aruco_status_ = e.markers; }));
 }
 
 void MainView::showDroneVideoFeed() {
@@ -38,9 +44,8 @@ void MainView::showDroneVideoFeed() {
       ImVec2 mousePositionRelative = ImVec2(mousePositionAbsolute.x - screenPositionAbsolute.x,
                                             mousePositionAbsolute.y - screenPositionAbsolute.y);
 
-      event_->data.x = mousePositionRelative.x;
-      event_->data.y = mousePositionRelative.y;
-      event_->active = true;
+      MouseEvent mouse_event(mousePositionRelative.x, mousePositionRelative.y);
+      gevent_dispatcher.dispatch("TrackerNewTarget", mouse_event);
     }
     ImGui::EndTabItem();
   }
@@ -140,8 +145,18 @@ void MainView::update() {
   ImGui::Begin("Aruco detector");
   if (ImGui::Button(aruco_button_string.c_str())) {
     aruco_detector_enabled_ = !aruco_detector_enabled_;
-    gbutton_event_dispatcher.dispatch("ArucoDetector");
+    EnableButtonEvent enable_event(aruco_detector_enabled_);
+    gevent_dispatcher.dispatch("ArucoDetector", enable_event);
   }
+
+  ImGui::Text("Markers detected : %i", (int)aruco_status_.size());
+
+  int count = 1;
+  for (const auto& marker : aruco_status_) {
+    ImGui::Text("%i", marker.id);
+    count++;
+  }
+
   ImGui::End();
 
   std::string face_button_string;
@@ -154,7 +169,8 @@ void MainView::update() {
   ImGui::Begin("Face detector");
   if (ImGui::Button(face_button_string.c_str())) {
     face_detector_enabled_ = !face_detector_enabled_;
-    gbutton_event_dispatcher.dispatch("FaceDetector");
+    EnableButtonEvent enable_event(face_detector_enabled_);
+    gevent_dispatcher.dispatch("FaceDetector", enable_event);
   }
   ImGui::End();
 
@@ -186,5 +202,3 @@ void MainView::setImage(unsigned char* image) { image_ = image; }
 void MainView::setImgProcImage(unsigned char* image) { imgproc_image_ = image; }
 
 void MainView::setTextures(GLuint* textures) { textures_ = textures; }
-
-Event* MainView::getEvent() { return event_; }

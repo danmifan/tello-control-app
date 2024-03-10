@@ -3,62 +3,11 @@
 
 #include <deque>
 #include <map>
-#include "drone_status.h"
 #include <opencv2/core.hpp>
 
-#include <eventpp/eventdispatcher.h>
-
-struct ArucoMarker {
-  int id;
-  cv::Vec3f euler;
-  cv::Vec3d tvec;
-};
-
-struct ArucoDetectorStatus {
-  std::vector<ArucoMarker> markers;
-};
-
-enum EventType {
-  DEMO = 0,
-};
-
-struct AEvent {
-  int type;
-};
-
-struct DemoEvent : AEvent {
-  int a;
-  int b;
-
-  DemoEvent() {
-    type = EventType::DEMO;
-  }
-};
-
-struct RCEvent {
-  int y;
-  int x;
-  int minus_z;
-  int yaw;
-};
-
-// struct ButtonEventPolicy {
-//   static int getEvent(const ButtonEvent& e) {
-//     // return e.type;
-//   }
-// };
-
-// extern eventpp::EventDispatcher<DemoEvent, void()> gevent_dispatcher;
-// extern eventpp::EventDispatcher<std::string, void(const ButtonEvent&),ButtonEventPolicy> gevent_dispatcher;
-extern eventpp::EventDispatcher<std::string, void()> gbutton_event_dispatcher;
-extern eventpp::EventDispatcher<std::string, void(const std::string&)> gbutton_input_event_dispatcher;
-extern eventpp::EventDispatcher<int, void(const RCEvent& event)> grc_event_dispatcher;
-
-
 #warning wip
-// ArucoDetectorStatus aruco_detector_status;
 extern std::map<std::string, int> thread_time_;
-extern std::deque<DroneState> status_;
+// extern std::deque<DroneState> status_;
 extern std::deque<cv::Mat> frames_;
 extern std::vector<int> pid_values_;
 

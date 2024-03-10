@@ -2,14 +2,27 @@
 
 #include "logger.h"
 
-Tracker::Tracker() { cv_tracker_ = cv::legacy::TrackerMedianFlow::create(); }
+#include "event.h"
 
-void Tracker::setEvent(Event* event) { event_ = event; }
+Tracker::Tracker() {
+  cv_tracker_ = cv::legacy::TrackerMedianFlow::create();
 
-bool Tracker::track(cv::Mat frame, TrackData& target) {
-  if (event_->active) {
-    int tl_x = event_->data.x - rect_width_ / 2;
-    int tl_y = event_->data.y - rect_height_ / 2;
+  gevent_dispatcher.appendListener(
+      "TrackerNewTarget",
+      eventpp::argumentAdapter<void(const MouseEvent &)>([&](const MouseEvent &e) {
+        new_target_received_ = true;
+        target_x = e.x;
+        target_y = e.y;
+        std::stringstream ss;
+        ss << "New tracker target : " << e.x << " " << e.y;
+        Log::get().info(ss.str());
+      }));
+}
+
+bool Tracker::track(cv::Mat frame, TrackData &target) {
+  if (new_target_received_) {
+    int tl_x = target_x - rect_width_ / 2;
+    int tl_y = target_y - rect_height_ / 2;
 
     cv::Rect2d rect(tl_x, tl_y, rect_width_, rect_height_);
 
@@ -17,7 +30,7 @@ bool Tracker::track(cv::Mat frame, TrackData& target) {
 
     // int delta_pos_x = -(960 / 2 - event_->data.x);
     // int delta_pos_y = -(720 / 2 - event_->data.y);
-    event_->active = false;
+    new_target_received_ = false;
     // Log::get().info(std::to_string(delta_pos_.x) + " " +
     // std::to_string(delta_pos_.y);
 

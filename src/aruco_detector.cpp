@@ -5,6 +5,7 @@
 #include <opencv2/imgproc.hpp>
 
 #include <iostream>
+#include "event.h"
 
 cv::Vec3f decomposeRotation(cv::Mat m) {
   cv::Vec3f euler;
@@ -50,6 +51,8 @@ bool ArucoDetector::detect(cv::Mat frame, cv::Vec3d& mvt) {
   // cv::aruco::refineDetectedMarkers(frame, board_, marker_corners, marker_ids,
   // rejected_candidates);
 
+  ArucoDetectorStatusEvent aruco_event;
+
   if (marker_ids.size() > 0) {
     cv::aruco::drawDetectedMarkers(frame, marker_corners, marker_ids);
 
@@ -64,6 +67,7 @@ bool ArucoDetector::detect(cv::Mat frame, cv::Vec3d& mvt) {
     cv::Vec3d eulers;
 
     for (uint i = 0; i < marker_ids.size(); i++) {
+      int id = marker_ids[i];
       cv::drawFrameAxes(frame, camera_matrix_, dist_, rvecs[i], tvecs[i], 0.05);
 
       cv::Mat m_rot;
@@ -104,10 +108,16 @@ bool ArucoDetector::detect(cv::Mat frame, cv::Vec3d& mvt) {
       mvt[0] = tvecs[i][2] * 100;
       mvt[1] = tvecs[i][0] * 100;
       mvt[2] = tvecs[i][1] * 100;
+
+      aruco_event.markers.push_back({id});
     }
+
+    gevent_dispatcher.dispatch("ArucoDetectorStatus", aruco_event);
 
     return true;
   }
+
+  gevent_dispatcher.dispatch("ArucoDetectorStatus", aruco_event);
 
   return false;
 }

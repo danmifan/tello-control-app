@@ -8,8 +8,8 @@
 #include "data.h"
 #include "logger.h"
 #include "global.h"
-#include "utils.h"
 #include "pid_controller.h"
+#include "event.h"
 
 std::map<std::string, int> thread_time_;
 std::vector<int> pid_values_;
@@ -20,7 +20,7 @@ std::vector<int> z_cmds;
 std::vector<int> yaw_cmds;
 
 ImageProcessing::ImageProcessing(int width, int height, int channels) {
-  image_ = (unsigned char*)malloc(width * height * channels);
+  image_ = (unsigned char *)malloc(width * height * channels);
 
   pid_values_.reserve(10000);
   x_cmds.reserve(10000);
@@ -43,21 +43,24 @@ ImageProcessing::~ImageProcessing() {
 void ImageProcessing::start() {
   run_ = true;
 
-  gbutton_event_dispatcher.appendListener("IP_Hover", [&]() {
+  gevent_dispatcher.appendListener("IP_Hover", [&](const Event &) {
     hover();
     Log::get().info("Hover activated");
   });
 
-   gbutton_event_dispatcher.appendListener("ArucoDetector", [&]() {
-    Log::get().info("Aruco detector");
-    aruco_detector_enabled_ = !aruco_detector_enabled_;
-  });
+  gevent_dispatcher.appendListener(
+      "FaceDetector",
+      eventpp::argumentAdapter<void(const EnableButtonEvent &)>([&](const EnableButtonEvent &e) {
+        Log::get().info("Face detector");
+        face_detector_enabled_ = e.enable;
+      }));
 
-   gbutton_event_dispatcher.appendListener("FaceDetector", [&]() {
-    Log::get().info("Face detector");
-    face_detector_enabled_ = !face_detector_enabled_;
-  });
-
+  gevent_dispatcher.appendListener(
+      "ArucoDetector",
+      eventpp::argumentAdapter<void(const EnableButtonEvent &)>([&](const EnableButtonEvent &e) {
+        Log::get().info("Aruco detector");
+        aruco_detector_enabled_ = e.enable;
+      }));
 
   th_ = std::thread([&]() {
     // PIDController z_pid(0.7, 0.0001, 0.1);
@@ -107,8 +110,8 @@ void ImageProcessing::start() {
 
               // Log::get().info("PID : " + std::to_string(y_cmd) + " " + std::to_string(z_cmd));
 
-              grc_event_dispatcher.dispatch(0, {(int)y_cmd, 0, (int)-z_cmd, 0});
-              // fc_->radioControl(y_cmd, 0, -z_cmd, 0);
+              RCEvent rc_event{(int)y_cmd, 0, (int)-z_cmd, 0};
+              gevent_dispatcher.dispatch("RCCommands", rc_event);
             }
           }
         }
@@ -159,9 +162,7 @@ void ImageProcessing::start() {
   });
 }
 
-void ImageProcessing::setEvent(Event* event) { tracker_.setEvent(event); }
-
-unsigned char* ImageProcessing::getImage() { return image_; }
+unsigned char *ImageProcessing::getImage() { return image_; }
 
 void ImageProcessing::hover() {
   hover_enabled_ = !hover_enabled_;

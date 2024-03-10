@@ -3,14 +3,15 @@
 #include <imgui.h>
 
 #include "data.h"
+#include "event.h"
 
-DroneStatusView::DroneStatusView(DroneStatus* drone_status) : drone_status_(drone_status) {}
+DroneStatusView::DroneStatusView() {
+  gevent_dispatcher.appendListener(
+      "NewDroneState", eventpp::argumentAdapter<void(const DroneStateEvent &)>(
+                           [&](const DroneStateEvent &e) { current_state_ = e.state; }));
+}
 
 void DroneStatusView::update() {
-  if (!status_.empty()) {
-    current_state_ = status_.back();
-  }
-
   Vec4i battery_color;
 
   if (current_state_.bat >= 0 && current_state_.bat <= 25) {

@@ -13,7 +13,6 @@ class DroneStatus {
   int start();
 
  private:
-  std::deque<DroneState> states_;
   int state_socket_;
   std::thread th_;
   std::atomic<bool> run_ = {true};

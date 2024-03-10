@@ -5,62 +5,42 @@
 #include <iostream>
 #include "logger.h"
 
-#include "global.h"
+#include "event.h"
+
+FlightControl::FlightControl() {
+  answer_buffer_ = (char *)malloc(ANSWER_BUFFER_SIZE);
+
+  // Connecting events
+  gevent_dispatcher.appendListener("EnableSDK", [&](const Event &) { enableSDK(); });
+  gevent_dispatcher.appendListener("Takeoff", [&](const Event &) { takeoff(); });
+  gevent_dispatcher.appendListener("Land", [&](const Event &) { land(); });
+  gevent_dispatcher.appendListener("Emergency", [&](const Event &) { emergencyStop(); });
+  gevent_dispatcher.appendListener("Battery", [&](const Event &) { getBattery(); });
+  gevent_dispatcher.appendListener("Streamon", [&](const Event &) { streamon(); });
+  gevent_dispatcher.appendListener("Streamoff", [&](const Event &) { streamoff(); });
+
+  gevent_dispatcher.appendListener("CustomCommand",
+                                   eventpp::argumentAdapter<void(const ButtonInputEvent &)>(
+                                       [&](const ButtonInputEvent &e) { customCommand(e.input); }));
+
+  gevent_dispatcher.appendListener(
+      "RCCommands", eventpp::argumentAdapter<void(const RCEvent &)>(
+                        [&](const RCEvent &e) { radioControl(e.y, e.x, e.minus_z, e.yaw); }));
+}
 
 FlightControl::~FlightControl() {
   run_ = false;
   th_.join();
   close(cmd_socket_);
-  if (answer_buffer_ != nullptr) {
-    delete answer_buffer_;
-  }
+  delete answer_buffer_;
 }
 
 int FlightControl::start() {
-  // Connecting events
-  gbutton_event_dispatcher.appendListener("EnableSDK", [&]() {
-    enableSDK();
-  });
-
-  gbutton_event_dispatcher.appendListener("Takeoff", [&]() {
-    takeoff();
-  });
-  
-   gbutton_event_dispatcher.appendListener("Land", [&]() {
-    land();
-  });
-  
-  gbutton_event_dispatcher.appendListener("Emergency", [&]() {
-    emergencyStop();
-  });
-
-  gbutton_event_dispatcher.appendListener("Battery", [&]() {
-    getBattery();
-  });
-
-  gbutton_event_dispatcher.appendListener("Streamon", [&]() {
-    streamon();
-  });
-
-  gbutton_event_dispatcher.appendListener("Streamoff", [&]() {
-    streamoff();
-  });
-
-  gbutton_input_event_dispatcher.appendListener("CustomCommand", [&](const std::string& str) {
-    customCommand(str);
-  });
-
-  grc_event_dispatcher.appendListener(0, [&](const RCEvent& e) {
-    radioControl(e.y, e.x, e.minus_z, e.yaw);
-  });
-
   cmd_socket_ = socket(AF_INET, SOCK_DGRAM, 0);
   if (cmd_socket_ == -1) {
     Log::get().warning("Error, could not initialize CMD socket");
     return -1;
   }
-
-  answer_buffer_ = (char *)malloc(256);
 
   // Socket timeout
   tv_.tv_sec = COMMAND_TIMEOUT_SEC;
@@ -108,21 +88,23 @@ int FlightControl::start() {
           Log::get().warning("Send timeout");
           continue;
         } else {
-          Log::get().info("Command sent : " + command);
+          // Not a RC command
+          if (command.find("rc") == std::string::npos) {
+            Log::get().info("Command sent : " + command);
+          }
         }
 
-        int answer_size = recvfrom(cmd_socket_, answer_buffer_, 256, 0,
+        int answer_size = recvfrom(cmd_socket_, answer_buffer_, ANSWER_BUFFER_SIZE, 0,
                                    (struct sockaddr *)&source_addr_, &source_addr_size_);
 
         if (answer_size < 0) {
-          Log::get().warning("Recv timeout");
+          // Log::get().warning("Recv timeout");
         } else {
-          char *test_answer = (char *)malloc(answer_size);
-          memcpy(test_answer, answer_buffer_, answer_size);
-          Log::get().info("Answer : " + std::string(test_answer));
-
-          delete test_answer;
+          answer_buffer_[answer_size] = '\0';
+          Log::get().info("Answer : " + std::string(answer_buffer_));
         }
+
+        memset(answer_buffer_, 0, ANSWER_BUFFER_SIZE);
       }
 
       auto logic_end = std::chrono::high_resolution_clock::now();

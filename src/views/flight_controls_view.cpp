@@ -2,51 +2,56 @@
 
 #include <imgui.h>
 
-#include "global.h"
+#include "event.h"
 
 char buffer[256];
 
-FlightControlView::FlightControlView() {}
+FlightControlView::FlightControlView() {
+  gevent_dispatcher.appendListener(
+      "RCCommands", eventpp::argumentAdapter<void(const RCEvent&)>([&](const RCEvent& e) {
+        rc_commands_ = {e.y, e.x, e.minus_z, e.yaw};
+      }));
+}
 
 void FlightControlView::update() {
   ImGui::Begin("Commands");
 
   if (ImGui::Button("EnableSDK")) {
-    gbutton_event_dispatcher.dispatch("EnableSDK");
+    gevent_dispatcher.dispatch("EnableSDK", {});
   }
 
   if (ImGui::Button("Takeoff")) {
-    gbutton_event_dispatcher.dispatch("Takeoff");
+    gevent_dispatcher.dispatch("Takeoff", {});
   }
 
   ImGui::SameLine();
 
   if (ImGui::Button("Land")) {
-    gbutton_event_dispatcher.dispatch("Land");
+    gevent_dispatcher.dispatch("Land", {});
   }
 
   ImGui::SameLine();
 
   if (ImGui::Button("Emergency")) {
-    gbutton_event_dispatcher.dispatch("Emergency");
+    gevent_dispatcher.dispatch("Emergency", {});
   }
 
   if (ImGui::Button("Hover")) {
-    gbutton_event_dispatcher.dispatch("IP_Hover");
+    gevent_dispatcher.dispatch("IP_Hover", {});
   }
 
   if (ImGui::Button("Battery?")) {
-    gbutton_event_dispatcher.dispatch("Battery");
+    gevent_dispatcher.dispatch("Battery", {});
   }
 
   if (ImGui::Button("Stream ON")) {
-    gbutton_event_dispatcher.dispatch("Streamon");
+    gevent_dispatcher.dispatch("Streamon", {});
   }
 
   ImGui::SameLine();
 
   if (ImGui::Button("Stream OFF")) {
-    gbutton_event_dispatcher.dispatch("Streamoff");
+    gevent_dispatcher.dispatch("Streamoff", {});
   }
 
   ImGui::InputText("Custom", buffer, sizeof(buffer));
@@ -54,9 +59,11 @@ void FlightControlView::update() {
   ImGui::SameLine();
 
   if (ImGui::Button("Validate")) {
-    std::string str(buffer);
-    gbutton_input_event_dispatcher.dispatch("CustomCommand", str);
+    ButtonInputEvent input_event(buffer);
+    gevent_dispatcher.dispatch("CustomCommand", input_event);
   }
+
+  ImGui::Text("RC : %i %i %i %i", rc_commands_.x, rc_commands_.y, rc_commands_.z, rc_commands_.w);
 
   ImGui::End();
 }

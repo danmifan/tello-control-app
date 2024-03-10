@@ -133,7 +133,7 @@ project "tello-control-app-cli"
     "src/tracker.cpp",
     "src/video_streaming.cpp",
     "src/cli/tello_control_app_cli.cpp",
-    "src/global.cpp"
+    "src/event.cpp"
   }
 
 -- project "calib"

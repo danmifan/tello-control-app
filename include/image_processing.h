@@ -19,7 +19,6 @@ class ImageProcessing {
   ImageProcessing(int width, int height, int channels);
   ~ImageProcessing();
   void start();
-  void setEvent(Event* event);
   unsigned char* getImage();
   void hover();
 
@@ -42,8 +41,8 @@ class ImageProcessing {
   cv::Vec3d hover_pose_;
   bool first_aruco_pose_ = false;
 
-  bool aruco_detector_enabled_;
-  bool face_detector_enabled_;
+  bool aruco_detector_enabled_ = false;
+  bool face_detector_enabled_ = false;
 };
 
 #endif  // IMAGE_PROCESSING_H

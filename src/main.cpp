@@ -1,6 +1,7 @@
-//ORBSLAM
-// #include <System.h>
-#include "global.h"
+// ORBSLAM
+//  #include <System.h>
+
+#include "event.h"
 
 #include "window/window.h"
 #include "flight_control.h"
@@ -15,9 +16,8 @@
 #include "image_processing.h"
 #include "logger.h"
 
-
 int main(int /*argc*/, char** /*argv*/) {
-  #warning Add width/height to json config file
+#warning Add width/height to json config file
   MyWindow window(1600, 900, 60, "Tello control");
 
   FlightControl flight_control;
@@ -29,23 +29,18 @@ int main(int /*argc*/, char** /*argv*/) {
   // Views
   MainView main_view(960, 720);
   FlightControlView fc_view;
-  DroneStatusView drone_status_view(&drone_status);
+  DroneStatusView drone_status_view;
 
   flight_control.start();
   drone_status.start();
   processing.start();
   joystick_rc.start();
 
-  gbutton_event_dispatcher.appendListener("Streamoff", [&]() {
-    stream.start();
-  });
-  
-  gbutton_event_dispatcher.appendListener("Streamoff", [&]() {
-    stream.stop();
-  });
+  gevent_dispatcher.appendListener("Streamon", [&](const Event&) { stream.start(); });
+  gevent_dispatcher.appendListener("Streamoff", [&](const Event&) { stream.stop(); });
 
-  // ORB_SLAM3::System slam("/home/vincent/workspace/ORB_SLAM3/Vocabulary/ORBvoc.txt", "", ORB_SLAM3::System::MONOCULAR, false);
-  // float image_scale = slam.GetImageScale();
+  // ORB_SLAM3::System slam("/home/vincent/workspace/ORB_SLAM3/Vocabulary/ORBvoc.txt", "",
+  // ORB_SLAM3::System::MONOCULAR, false); float image_scale = slam.GetImageScale();
 
   window.init();
 
@@ -57,7 +52,6 @@ int main(int /*argc*/, char** /*argv*/) {
   main_view.setImgProcImage(processing.getImage());
   main_view.setTextures(window.getTextures());
   // processing.setImage(stream.getImage());
-  processing.setEvent(main_view.getEvent());
 
   window.update();
 

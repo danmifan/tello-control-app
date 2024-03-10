@@ -27,11 +27,6 @@ struct Vec4i {
   int w = 0;
 };
 
-struct Event {
-  bool active = false;
-  Vec2i data;
-};
-
 struct DroneState {
   Vec3i attitude;
   Vec3i velocity;
@@ -46,6 +41,12 @@ struct DroneState {
   Vec3f acceleration;
   struct timeval timestamp;
   float dt = 0.0;
+};
+
+struct ArucoMarker {
+  int id;
+  Vec3f euler;
+  Vec3f tvec;
 };
 
 #endif  // DATA_H

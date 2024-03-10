@@ -1,12 +1,10 @@
 #ifndef MAIN_VIEW_H
 #define MAIN_VIEW_H
 
-#include "data.h"
+#include <vector>
 #include "window/aview.h"
 #include <GL/gl.h>
-#include "image_processing.h"
-
-#include "global.h"
+#include "data.h"
 
 class MainView : public AView {
  public:
@@ -18,7 +16,6 @@ class MainView : public AView {
   void setImage(unsigned char* image);
   void setImgProcImage(unsigned char* image);
   void setTextures(GLuint* textures);
-  Event* getEvent();
 
  private:
   unsigned char* image_;
@@ -27,9 +24,10 @@ class MainView : public AView {
   int image_width_;
   int image_height_;
   bool show_demo_ = false;
-  Event* event_;
   bool aruco_detector_enabled_ = false;
   bool face_detector_enabled_ = false;
+
+  std::vector<ArucoMarker> aruco_status_;
 };
 
 #endif  // MAIN_VIEW_H

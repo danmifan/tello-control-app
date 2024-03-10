@@ -5,15 +5,15 @@
 #include <chrono>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <math.h>
+#include <cstring>
 
 // shm
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-#include "global.h"
+#include "event.h"
 #include "logger.h"
-
-std::deque<DroneState> status_;
 
 DroneStatus::~DroneStatus() {
   close(state_socket_);
@@ -94,7 +94,9 @@ int DroneStatus::start() {
 
         state.dt = duration_s;
 
-        status_.push_back(state);
+        // status_.push_back(state);
+        DroneStateEvent event(state);
+        gevent_dispatcher.dispatch("NewDroneState", event);
 
         float aX = state.acceleration.y;
         float aY = state.acceleration.x;
@@ -103,9 +105,8 @@ int DroneStatus::start() {
         float pitch = atan2(aY, aZ) * 57.3;
         float roll = atan2((-aX), sqrt(aY * aY + aZ * aZ)) * 57.3;
 
-        std::cout << "Roll pitch " << roll << " " << pitch << std::endl;
-
-        std::cout << state.attitude.x << " " << state.attitude.y << std::endl;
+        // std::cout << "Roll pitch " << roll << " " << pitch << std::endl;
+        // std::cout << state.attitude.x << " " << state.attitude.y << std::endl;
 
         // state.acceleration.x = roll;
         // state.acceleration.y = pitch;

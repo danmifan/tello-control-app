@@ -15,9 +15,11 @@
 #define COMMAND_TIMEOUT_USEC 0     // usec
 #define RC_COMMAND_TIMEOUT_SEC 0   // s
 #define RC_COMMAND_TIMEOUT_USEC 1  // usec
+#define ANSWER_BUFFER_SIZE 256     // bytes
 
 class FlightControl {
  public:
+  FlightControl();
   ~FlightControl();
   int start();
   void shutdown();

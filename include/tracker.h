@@ -14,7 +14,6 @@ struct TrackData {
 class Tracker {
  public:
   Tracker();
-  void setEvent(Event* event);
   bool track(cv::Mat frame, TrackData& target);
 
  private:
@@ -22,7 +21,10 @@ class Tracker {
   bool init_ = false;
   int rect_width_ = 160;
   int rect_height_ = 100;
-  Event* event_;
+
+  bool new_target_received_ = false;
+  int target_x;
+  int target_y;
 };
 
 #endif  // TRACKER_H

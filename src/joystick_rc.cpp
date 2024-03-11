@@ -23,6 +23,8 @@ void JoystickRc::start() {
         if (inputs.cross_up) {
           Log::get().info("Cross");
           enabled_ = !enabled_;
+          EnableButtonEvent event(enabled_);
+          gevent_dispatcher.dispatch("JoystickEnabled", event);
         }
         if (inputs.circle_up) {
           Log::get().info("Circle");

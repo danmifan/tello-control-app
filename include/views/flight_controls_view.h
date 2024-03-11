@@ -12,6 +12,7 @@ class FlightControlView : public AView {
  private:
   bool* joystick_enabled_;
   Vec4i rc_commands_;
+  bool joystick_control_enabled_ = false;
 };
 
 #endif  // FLIGHT_CONTROL_VIEW_H

@@ -196,6 +196,21 @@ void MainView::update() {
   }
   ImGui::End();
 
+  std::string tracker_button_string;
+  if (tracker_enabled_) {
+    tracker_button_string = "Disable";
+  } else {
+    tracker_button_string = "Enable";
+  }
+
+  ImGui::Begin("Tracker");
+  if (ImGui::Button(tracker_button_string.c_str())) {
+    tracker_enabled_ = !tracker_enabled_;
+    EnableButtonEvent enable_event(tracker_enabled_);
+    gevent_dispatcher.dispatch("Tracker", enable_event);
+  }
+  ImGui::End();
+
   // ImGui::Begin("Plot");
   // static float test[] = {0};
   // // static float test2[] = {360.0f};

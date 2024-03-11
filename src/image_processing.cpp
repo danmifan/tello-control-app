@@ -64,6 +64,13 @@ void ImageProcessing::start() {
         aruco_detector_enabled_ = e.enable;
       }));
 
+  gevent_dispatcher.appendListener(
+      "Tracker",
+      eventpp::argumentAdapter<void(const EnableButtonEvent &)>([&](const EnableButtonEvent &e) {
+        Log::get().info("Tracker");
+        tracker_enabled_ = e.enable;
+      }));
+
   th_ = std::thread([&]() {
     // PIDController z_pid(0.7, 0.0001, 0.1);
     PIDController z_pid(0.5, 0, 0);
@@ -80,16 +87,6 @@ void ImageProcessing::start() {
         if (face_detector_enabled_) {
           face_detection_.detect(frame);
         }
-
-        // float image_scale = slam_->GetImageScale();
-
-        // if (image_scale != 1.f) {
-        //   cv::Mat resized;
-        //   int width = frame.cols * image_scale;
-        //   int height = frame.rows * image_scale;
-
-        //   cv::resize(resized, frame, cv::Size(width, height));
-        // }
 
         double timestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
                                std::chrono::high_resolution_clock::now().time_since_epoch())
@@ -135,27 +132,29 @@ void ImageProcessing::start() {
         }
 
         // Track
-        TrackData target;
-        if (tracker_.track(frame, target)) {
-          // Correct
-          int z_cmd = z_pid.correct(height_ / 2.0f, target.position.y);
-          int yaw_cmd = yaw_pid.correct(width_ / 2.0f, target.position.x);
+        if (tracker_enabled_) {
+          TrackData target;
+          if (tracker_.track(frame, target)) {
+            // Correct
+            int z_cmd = z_pid.correct(height_ / 2.0f, target.position.y);
+            int yaw_cmd = yaw_pid.correct(width_ / 2.0f, target.position.x);
 
-          pid_values_.push_back(yaw_cmd);
+            pid_values_.push_back(yaw_cmd);
 
-          Log::get().info("PID : " + std::to_string(z_cmd) + " " + std::to_string(yaw_cmd));
+            Log::get().info("PID : " + std::to_string(z_cmd) + " " + std::to_string(yaw_cmd));
 
-          // int yaw_cmd = target.dx * 0.5;
-          // int z_cmd = -target.dy * 0.5;
+            // int yaw_cmd = target.dx * 0.5;
+            // int z_cmd = -target.dy * 0.5;
 
-          // int yaw_cmd = target.dx * 0.75;
-          // int z_cmd = -target.dy * 0.75;
+            // int yaw_cmd = target.dx * 0.75;
+            // int z_cmd = -target.dy * 0.75;
 
-          RCEvent rc_event{0, 0, -z_cmd, yaw_cmd};
+            RCEvent rc_event{0, 0, -z_cmd, yaw_cmd};
 
-          gevent_dispatcher.dispatch("RCCommands", rc_event);
+            gevent_dispatcher.dispatch("RCCommands", rc_event);
 
-          // file_.write(yaw_cmd, -z_cmd, target.dx, target.dy);
+            // file_.write(yaw_cmd, -z_cmd, target.dx, target.dy);
+          }
         }
 
         cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);

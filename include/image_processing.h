@@ -46,6 +46,7 @@ class ImageProcessing {
 
   bool aruco_detector_enabled_ = false;
   bool face_detector_enabled_ = false;
+  bool tracker_enabled_ = false;
   // ORB_SLAM3::System* slam_;
 };
 

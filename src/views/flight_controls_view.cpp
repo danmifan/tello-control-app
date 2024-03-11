@@ -11,6 +11,11 @@ FlightControlView::FlightControlView() {
       "RCCommands", eventpp::argumentAdapter<void(const RCEvent&)>([&](const RCEvent& e) {
         rc_commands_ = {e.y, e.x, e.minus_z, e.yaw};
       }));
+
+  gevent_dispatcher.appendListener(
+      "JoystickEnabled",
+      eventpp::argumentAdapter<void(const EnableButtonEvent&)>(
+          [&](const EnableButtonEvent& e) { joystick_control_enabled_ = e.enable; }));
 }
 
 void FlightControlView::update() {
@@ -62,6 +67,13 @@ void FlightControlView::update() {
     ButtonInputEvent input_event(buffer);
     gevent_dispatcher.dispatch("CustomCommand", input_event);
   }
+
+  std::string joystick_control_str = "Joystick controls disabled";
+  if (joystick_control_enabled_) {
+    joystick_control_str = "Joystick controls enabled";
+  }
+
+  ImGui::Text("%s", joystick_control_str.c_str());
 
   ImGui::Text("RC : %i %i %i %i", rc_commands_.x, rc_commands_.y, rc_commands_.z, rc_commands_.w);
 

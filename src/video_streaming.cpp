@@ -5,14 +5,15 @@
 
 #include "logger.h"
 #include "global.h"
-
-#include "debug_chrono.h"
+#include "event.h"
 
 std::deque<cv::Mat> frames_;
 
 VideoStreaming::VideoStreaming(int width, int height, int channels) {
   image_ = (unsigned char*)malloc(width * height * channels);
   memset(image_, 0, width * height * channels);
+
+  gevent_dispatcher.appendListener("Screenshot", [&](const Event&) { take_screenshot_ = true; });
 }
 
 VideoStreaming::~VideoStreaming() {
@@ -62,6 +63,15 @@ void VideoStreaming::start() {
       cv::Mat frame;
       if (cap_.read(frame)) {
         if (!frame.empty()) {
+          if (take_screenshot_) {
+            take_screenshot_ = false;
+            static int count = 0;
+            std::string filename = "screenshots/img_" + std::to_string(count) + ".jpg";
+            cv::imwrite(filename, frame);
+            Log::get().info("Screenshot taken : " + filename);
+            count++;
+          }
+
           cv::Mat cvt_frame;
 
           frames_.push_back(frame);
@@ -77,6 +87,9 @@ void VideoStreaming::start() {
       auto t2 = std::chrono::high_resolution_clock::now();
       int duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
+      ThreadTimeEvent event("VideoStreaming", duration_ms);
+      gevent_dispatcher.dispatch("ThreadTime", event);
+
       int delta = 33 - duration_ms;
 
       if (delta > 0) {
@@ -84,7 +97,7 @@ void VideoStreaming::start() {
       }
     }
     cap_.release();
-    std::cout << "Stream end" << std::endl;
+    Log::get().info("Stream end");
   });
 }
 

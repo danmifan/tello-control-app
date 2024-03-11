@@ -1,6 +1,9 @@
 #ifndef IMAGE_PROCESSING_H
 #define IMAGE_PROCESSING_H
 
+// ORBSLAM
+// #include <System.h>
+
 #include <atomic>
 #include <thread>
 #include <math.h>
@@ -43,6 +46,7 @@ class ImageProcessing {
 
   bool aruco_detector_enabled_ = false;
   bool face_detector_enabled_ = false;
+  // ORB_SLAM3::System* slam_;
 };
 
 #endif  // IMAGE_PROCESSING_H

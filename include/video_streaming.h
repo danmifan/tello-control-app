@@ -24,6 +24,7 @@ class VideoStreaming {
   cv::VideoCapture cap_;
   // std::deque<cv::Mat> frames_;
   unsigned char* image_;
+  bool take_screenshot_ = false;
 };
 
 #endif  // VIDEO_STREAMING_H

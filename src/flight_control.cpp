@@ -121,6 +121,9 @@ int FlightControl::start() {
           std::chrono::duration_cast<std::chrono::milliseconds>(th_end - th_begin).count();
 
       time_since_last_command_ += total_th;
+
+      ThreadTimeEvent event("FlightControl", total_th);
+      gevent_dispatcher.dispatch("ThreadTime", event);
     }
   });
 

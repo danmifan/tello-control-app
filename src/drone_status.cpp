@@ -88,13 +88,11 @@ int DroneStatus::start() {
         }
 
         auto t2 = std::chrono::high_resolution_clock::now();
-        // int duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
         float duration_s =
             std::chrono::duration_cast<std::chrono::duration<float>>(t2 - t1).count();
 
         state.dt = duration_s;
 
-        // status_.push_back(state);
         DroneStateEvent event(state);
         gevent_dispatcher.dispatch("NewDroneState", event);
 
@@ -114,6 +112,13 @@ int DroneStatus::start() {
         // Writing data to shm
         memcpy(shm_addr_, &state, sizeof(DroneState));
       }
+
+      auto t3 = std::chrono::high_resolution_clock::now();
+
+      int duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(t3 - t1).count();
+
+      ThreadTimeEvent th_event("DroneStatus", duration_ms);
+      gevent_dispatcher.dispatch("ThreadTime", th_event);
     }
   });
 

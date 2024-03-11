@@ -135,8 +135,9 @@ It might be possible for example to add an arduino nano on the drone and an ultr
 
 ### Dependencies
 
-- ImGui
+- ImGui (Included in this repo)
 - OpenCV
 - Eigen
+- eventpp (Headers includes in this repo)
 
 

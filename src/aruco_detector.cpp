@@ -90,11 +90,9 @@ bool ArucoDetector::detect(cv::Mat frame, cv::Vec3d& mvt) {
 
       std::stringstream euler_ss;
       euler_ss << euler;
-      // std::cout << euler << std::endl;
 
       std::stringstream tvec_ss;
       tvec_ss << tvecs[i];
-      std::cout << tvecs[i] << std::endl;
 
       cv::putText(frame, euler_ss.str(), marker_corners.at(0).at(0), cv::FONT_HERSHEY_PLAIN, 2,
                   cv::Scalar(255, 255, 255, 255));
@@ -109,7 +107,12 @@ bool ArucoDetector::detect(cv::Mat frame, cv::Vec3d& mvt) {
       mvt[1] = tvecs[i][0] * 100;
       mvt[2] = tvecs[i][1] * 100;
 
-      aruco_event.markers.push_back({id});
+      Vec3f tvec;
+      tvec.x = tvecs[i][0];
+      tvec.y = tvecs[i][1];
+      tvec.z = tvecs[i][2];
+
+      aruco_event.markers.push_back({id, {euler[0], euler[1], euler[2]}, tvec});
     }
 
     gevent_dispatcher.dispatch("ArucoDetectorStatus", aruco_event);

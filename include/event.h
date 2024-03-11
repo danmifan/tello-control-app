@@ -15,6 +15,12 @@ struct ButtonInputEvent : public Event {
   std::string input;
 };
 
+struct ThreadTimeEvent : public Event {
+  ThreadTimeEvent(std::string name, int value) : name(name), value(value) {}
+  std::string name;
+  int value;
+};
+
 struct EnableButtonEvent : public Event {
   EnableButtonEvent(bool enable) : enable(enable) {}
   bool enable;

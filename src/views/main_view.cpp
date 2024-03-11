@@ -15,6 +15,10 @@ MainView::MainView(int image_width, int image_height)
       "ArucoDetectorStatus",
       eventpp::argumentAdapter<void(const ArucoDetectorStatusEvent&)>(
           [&](const ArucoDetectorStatusEvent& e) { aruco_status_ = e.markers; }));
+
+  gevent_dispatcher.appendListener(
+      "ThreadTime", eventpp::argumentAdapter<void(const ThreadTimeEvent&)>(
+                        [&](const ThreadTimeEvent& e) { thread_time_[e.name] = e.value; }));
 }
 
 void MainView::showDroneVideoFeed() {
@@ -97,9 +101,7 @@ void MainView::showOverlay() {
 
   ImGui::SetNextWindowBgAlpha(0.35f);  // Transparent background
   if (ImGui::Begin("Example: Simple overlay", NULL, window_flags)) {
-    ImGui::Text(
-        "Simple overlay\n"
-        "(right-click to change position)");
+    ImGui::Text("Threads time");
     ImGui::Separator();
     if (ImGui::IsMousePosValid()) {
       ImGui::Text("Mouse Position: (%.1f,%.1f)", io.MousePos.x, io.MousePos.y);
@@ -107,6 +109,8 @@ void MainView::showOverlay() {
       ImGui::Text("Mouse Position: <invalid>");
     }
 
+    int dt = ImGui::GetIO().DeltaTime * 1000;
+    ImGui::Text("%s :  %i ms", "GUI", dt);
     for (const auto& time : thread_time_) {
       ImGui::Text("%s :  %i ms", time.first.c_str(), time.second);
     }
@@ -151,10 +155,28 @@ void MainView::update() {
 
   ImGui::Text("Markers detected : %i", (int)aruco_status_.size());
 
-  int count = 1;
-  for (const auto& marker : aruco_status_) {
-    ImGui::Text("%i", marker.id);
-    count++;
+  if (ImGui::BeginTable("ArucoTable", 3)) {
+    ImGui::TableSetupColumn("ID");
+    ImGui::TableSetupColumn("eulers");
+    ImGui::TableSetupColumn("tvec");
+    ImGui::TableHeadersRow();
+
+    for (int i = 0; i < aruco_status_.size(); i++) {
+      ImGui::TableNextRow();
+
+      ArucoMarker marker = aruco_status_.at(i);
+
+      ImGui::TableSetColumnIndex(0);
+      ImGui::Text("%i", marker.id);
+
+      ImGui::TableSetColumnIndex(1);
+      ImGui::Text("%f %f %f", marker.euler.x, marker.euler.y, marker.euler.z);
+
+      ImGui::TableSetColumnIndex(2);
+      ImGui::Text("%f %f %f", marker.tvec.x, marker.tvec.y, marker.tvec.z);
+    }
+
+    ImGui::EndTable();
   }
 
   ImGui::End();
@@ -184,6 +206,12 @@ void MainView::update() {
   //   ImPlot::EndPlot();
   // }
   // ImGui::End();
+
+  ImGui::Begin("CV");
+  if (ImGui::Button("Screenshot")) {
+    gevent_dispatcher.dispatch("Screenshot", {});
+  }
+  ImGui::End();
 
   ImGui::Begin("Plot");
   if (ImPlot::BeginPlot("RC commands")) {

@@ -11,7 +11,6 @@
 #include "pid_controller.h"
 #include "event.h"
 
-std::map<std::string, int> thread_time_;
 std::vector<int> pid_values_;
 
 std::vector<int> x_cmds;
@@ -31,6 +30,9 @@ ImageProcessing::ImageProcessing(int width, int height, int channels) {
   width_ = width;
   height_ = height;
   channels_ = channels;
+
+  // slam_ = new ORB_SLAM3::System("/home/vincent/workspace/ORB_SLAM3/Vocabulary/ORBvoc.txt",
+  //                               "cfg/calib.yaml", ORB_SLAM3::System::MONOCULAR, false);
 }
 
 ImageProcessing::~ImageProcessing() {
@@ -64,7 +66,7 @@ void ImageProcessing::start() {
 
   th_ = std::thread([&]() {
     // PIDController z_pid(0.7, 0.0001, 0.1);
-    PIDController z_pid(1, 0, 0);
+    PIDController z_pid(0.5, 0, 0);
     PIDController yaw_pid(0.5, 0, 0);
     PIDController y_pid(1, 0, 0);
 
@@ -78,6 +80,22 @@ void ImageProcessing::start() {
         if (face_detector_enabled_) {
           face_detection_.detect(frame);
         }
+
+        // float image_scale = slam_->GetImageScale();
+
+        // if (image_scale != 1.f) {
+        //   cv::Mat resized;
+        //   int width = frame.cols * image_scale;
+        //   int height = frame.rows * image_scale;
+
+        //   cv::resize(resized, frame, cv::Size(width, height));
+        // }
+
+        double timestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                               std::chrono::high_resolution_clock::now().time_since_epoch())
+                               .count();
+
+        // slam_->TrackMonocular(frame, timestamp);
 
         // Aruco
         if (aruco_detector_enabled_) {
@@ -133,7 +151,9 @@ void ImageProcessing::start() {
           // int yaw_cmd = target.dx * 0.75;
           // int z_cmd = -target.dy * 0.75;
 
-          // fc_->radioControl(0, 0, z_cmd, yaw_cmd);
+          RCEvent rc_event{0, 0, -z_cmd, yaw_cmd};
+
+          gevent_dispatcher.dispatch("RCCommands", rc_event);
 
           // file_.write(yaw_cmd, -z_cmd, target.dx, target.dy);
         }
@@ -155,9 +175,8 @@ void ImageProcessing::start() {
       auto t3 = std::chrono::high_resolution_clock::now();
       int total_time = std::chrono::duration_cast<std::chrono::milliseconds>(t3 - t1).count();
 
-      thread_time_["ImgProc"] = total_time;
-
-      // Log::get().info("Imgproc : " + std::to_string(total_time));
+      ThreadTimeEvent event("ImgProc", total_time);
+      gevent_dispatcher.dispatch("ThreadTime", event);
     }
   });
 }

@@ -98,6 +98,38 @@ project "tello-control-app"
     "src/views/*.cpp"
   }
 
+  project "test_slam"
+  kind "ConsoleApp"
+  language "C++"
+  targetdir "bin/"
+
+  includedirs {
+    "/usr/include/eigen3",
+    "/home/vincent/workspace/ORB_SLAM3",
+    "/home/vincent/workspace/ORB_SLAM3/Thirdparty/Sophus",
+    "/home/vincent/workspace/ORB_SLAM3/include",
+    "/home/vincent/workspace/ORB_SLAM3/include/CameraModels",
+  }
+
+  libdirs {
+    "/home/vincent/workspace/ORB_SLAM3/lib"
+  }
+
+  links {
+    "pthread",
+    "ORB_SLAM3",
+    "pangolin",
+    "GL"
+  }
+
+  buildoptions { "`pkg-config --cflags opencv4`"}
+  linkoptions {"`pkg-config --libs opencv4`" }
+
+
+  files {
+    "src/slam/test_slam.cpp"
+  }
+
 -- project "cli"
 --   kind "ConsoleApp"
 --   language "C++"
@@ -107,34 +139,34 @@ project "tello-control-app"
 --     "src/cli/cli.cpp"
 --   }
 
-project "tello-control-app-cli"
-  kind "ConsoleApp"
-  language "C++"
-  targetdir "bin/"
+-- project "tello-control-app-cli"
+--   kind "ConsoleApp"
+--   language "C++"
+--   targetdir "bin/"
 
-  buildoptions { "`pkg-config --cflags opencv4`"}
-  linkoptions {"`pkg-config --libs opencv4`" }
+--   buildoptions { "`pkg-config --cflags opencv4`"}
+--   linkoptions {"`pkg-config --libs opencv4`" }
 
-  includedirs {
-    "include",
-  }
+--   includedirs {
+--     "include",
+--   }
 
-  files {
-    "src/aruco_detector.cpp",
-    "src/drone_status.cpp",
-    "src/face_detection.cpp",
-    "src/file_logger.cpp",
-    "src/flight_control.cpp",
-    "src/image_processing.cpp",
-    "src/joystick_rc.cpp",
-    "src/joystick.cpp",
-    "src/logger.cpp",
-    "src/pid_controller.cpp",
-    "src/tracker.cpp",
-    "src/video_streaming.cpp",
-    "src/cli/tello_control_app_cli.cpp",
-    "src/event.cpp"
-  }
+--   files {
+--     "src/aruco_detector.cpp",
+--     "src/drone_status.cpp",
+--     "src/face_detection.cpp",
+--     "src/file_logger.cpp",
+--     "src/flight_control.cpp",
+--     "src/image_processing.cpp",
+--     "src/joystick_rc.cpp",
+--     "src/joystick.cpp",
+--     "src/logger.cpp",
+--     "src/pid_controller.cpp",
+--     "src/tracker.cpp",
+--     "src/video_streaming.cpp",
+--     "src/cli/tello_control_app_cli.cpp",
+--     "src/event.cpp"
+--   }
 
 -- project "calib"
 --   kind "ConsoleApp"

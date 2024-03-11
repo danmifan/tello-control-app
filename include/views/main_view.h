@@ -2,6 +2,8 @@
 #define MAIN_VIEW_H
 
 #include <vector>
+#include <map>
+#include <string>
 #include "window/aview.h"
 #include <GL/gl.h>
 #include "data.h"
@@ -26,6 +28,7 @@ class MainView : public AView {
   bool show_demo_ = false;
   bool aruco_detector_enabled_ = false;
   bool face_detector_enabled_ = false;
+  std::map<std::string, int> thread_time_;
 
   std::vector<ArucoMarker> aruco_status_;
 };

@@ -6,8 +6,6 @@
 #include <opencv2/core.hpp>
 
 #warning wip
-extern std::map<std::string, int> thread_time_;
-// extern std::deque<DroneState> status_;
 extern std::deque<cv::Mat> frames_;
 extern std::vector<int> pid_values_;
 

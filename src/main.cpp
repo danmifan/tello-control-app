@@ -1,7 +1,8 @@
-// ORBSLAM
-//  #include <System.h>
-
 #include "event.h"
+
+#include "joystick_rc.h"
+#include "video_streaming.h"
+#include "image_processing.h"
 
 #include "window/window.h"
 #include "flight_control.h"
@@ -11,9 +12,6 @@
 #include "views/flight_controls_view.h"
 #include "views/drone_status_view.h"
 
-#include "joystick_rc.h"
-#include "video_streaming.h"
-#include "image_processing.h"
 #include "logger.h"
 
 int main(int /*argc*/, char** /*argv*/) {
@@ -38,9 +36,6 @@ int main(int /*argc*/, char** /*argv*/) {
 
   gevent_dispatcher.appendListener("Streamon", [&](const Event&) { stream.start(); });
   gevent_dispatcher.appendListener("Streamoff", [&](const Event&) { stream.stop(); });
-
-  // ORB_SLAM3::System slam("/home/vincent/workspace/ORB_SLAM3/Vocabulary/ORBvoc.txt", "",
-  // ORB_SLAM3::System::MONOCULAR, false); float image_scale = slam.GetImageScale();
 
   window.init();
 
